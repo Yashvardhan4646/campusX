@@ -179,12 +179,12 @@ function ResourcesContent() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="bg-accent/30 border border-border/50 rounded-lg px-2.5 h-8 text-[11px] font-black uppercase tracking-tighter outline-none focus:ring-1 focus:ring-primary/30"
+            className="bg-accent border border-border/50 rounded-lg px-2.5 h-8 text-[11px] font-black uppercase tracking-tighter outline-none focus:ring-1 focus:ring-primary/30"
           >
-            <option value="newest">🕐 Newest</option>
-            <option value="popular">🔥 Popular</option>
-            <option value="saved">🔖 Bookmarked</option>
-            <option value="oldest">⏳ Oldest</option>
+            <option value="newest">Newest</option>
+            <option value="popular">Popular</option>
+            <option value="saved">Bookmarked</option>
+            <option value="oldest">Oldest</option>
           </select>
         </div>
       </div>
