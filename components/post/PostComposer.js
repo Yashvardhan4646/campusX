@@ -264,8 +264,8 @@ export default function PostComposer({ onPostCreated, defaultCommunity, noBorder
           {/* Edit mode */}
           {!isMarkdownPreview && (
             <Textarea
-              placeholder="What's happening on campus? (Supports **markdown**)"
-              className="resize-none border-none bg-transparent text-lg focus-visible:ring-0 p-0 min-h-25 font-mono"
+              placeholder="What's happening on campus?"
+              className="resize-none border-none bg-transparent text-lg focus-visible:ring-1 p-2 min-h-25 font-sans-serif focus-visible:ring-primary/50 focus-visible:ring-offset-0 focus-visible:ring-offset-background"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               maxLength={2000}
