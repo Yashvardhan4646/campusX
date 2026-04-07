@@ -164,7 +164,7 @@ export default function SearchPage() {
         
         {/* Tabs */} 
         <div className="flex border-b border-border"> 
-          {['posts', 'people', 'trending'].map(tab => ( 
+          {['posts', 'people'].map(tab => ( 
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)} 
