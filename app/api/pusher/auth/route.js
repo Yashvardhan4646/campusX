@@ -53,7 +53,7 @@ export async function POST(request) {
           { error: 'Not a member of this group or group inactive' }, 
           { status: 403 } 
         ) 
-      } 
+      }
     } 
 
     // Extract userId from channel name: private-notifications-[userId]
@@ -70,14 +70,60 @@ export async function POST(request) {
       // Auth passes — user can subscribe to their own channel
     }
 
+    // Study Room channels: presence-room-{roomId} and private-room-{roomId}
+    if (channelName.startsWith('presence-room-') || channelName.startsWith('private-room-')) {
+      const roomId = channelName.replace(/^(presence-room-|private-room-)/, '')
+
+      if (!validateObjectId(roomId)) {
+        return NextResponse.json({ error: 'Invalid room ID' }, { status: 400 })
+      }
+
+      await connectDB()
+
+      const StudyRoom = (await import('@/models/StudyRoom')).default
+      const room = await StudyRoom.findById(roomId).lean()
+
+      if (!room) {
+        return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+      }
+
+      const userId = currentUser._id.toString()
+      const isParticipant = room.participants.some(
+        p => p.toString() === userId
+      ) || room.creator.toString() === userId
+
+      if (!isParticipant) {
+        return NextResponse.json(
+          { error: 'Not a participant of this room' },
+          { status: 403 }
+        )
+      }
+    }
+
     // Generate Pusher auth response 
     const pusher = getPusherServer() 
-    const authResponse = pusher.authorizeChannel(socketId, channelName) 
-
-    return NextResponse.json(authResponse) 
+    
+    // Check if this is a presence channel
+    if (channelName.startsWith('presence-')) {
+      // For presence channels, include user info
+      const authResponse = pusher.authorizePresenceChannel(socketId, channelName, currentUser._id.toString(), {
+        user_id: currentUser._id.toString(),
+        user_info: {
+          id: currentUser._id.toString(),
+          name: currentUser.name,
+          avatar: currentUser.avatar || null,
+          username: currentUser.username,
+        }
+      }) 
+      return NextResponse.json(authResponse) 
+    } else {
+      // For private channels
+      const authResponse = pusher.authorizeChannel(socketId, channelName) 
+      return NextResponse.json(authResponse) 
+    }
 
   } catch (err) { 
     console.error('[PusherAuth Error]', err.stack || err.message) 
     return NextResponse.json({ error: 'Authentication failed' }, { status: 500 }) 
   } 
-} 
+}

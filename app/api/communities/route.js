@@ -10,6 +10,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const specificName = sanitizeMongoInput(searchParams.get('name'));
+    const limit = Math.min(parseInt(searchParams.get('limit')) || 50, 50);
 
     await connectDB();
 
@@ -43,7 +44,7 @@ export async function GET(request) {
           } 
         },
         { $sort: { postCount: -1 } },
-        { $limit: 50 }
+        { $limit: limit }
       ]);
 
       const communitiesMap = new Map();
