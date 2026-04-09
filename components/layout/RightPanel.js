@@ -31,12 +31,12 @@ export default function RightPanel() {
           fetch('/api/hashtags/trending?limit=6'),
           fetch('/api/events?filter=upcoming&limit=3')
         ])
-        
+
         const trendData = await trendRes.json()
         const suggestData = await suggestRes.json()
         const hashtagData = await hashtagRes.json()
         const eventData = await eventRes.json()
-        
+
         if (trendRes.ok) setTrending(trendData)
         if (suggestRes.ok) setSuggestions(suggestData)
         if (hashtagRes.ok) setTrendingHashtags(hashtagData.hashtags || [])
@@ -178,10 +178,10 @@ export default function RightPanel() {
                     <p className="text-[10px] text-muted-foreground truncate">@{user.username}</p>
                   </div>
                 </Link>
-                <FollowButton 
-                  targetUserId={user._id} 
+                <FollowButton
+                  targetUserId={user._id}
                   username={user.username}
-                  initialIsFollowing={currentUser?.following?.includes(user._id)} 
+                  initialIsFollowing={currentUser?.following?.includes(user._id)}
                   size="xs"
                 />
               </div>
@@ -192,10 +192,10 @@ export default function RightPanel() {
 
       <footer className="px-4 text-[11px] text-muted-foreground space-y-2">
         <div className="flex flex-wrap gap-x-4 gap-y-1">
-          <span className="hover:underline cursor-pointer">Terms of Service</span>
-          <span className="hover:underline cursor-pointer">Privacy Policy</span>
-          <span className="hover:underline cursor-pointer">Cookie Policy</span>
-          <span className="hover:underline cursor-pointer">Accessibility</span>
+          <Link href="/terms" className="hover:underline cursor-pointer">Terms of Service</Link>
+          <Link href="/privacy" className="hover:underline cursor-pointer">Privacy Policy</Link>
+          <Link href="/cookie" className="hover:underline cursor-pointer">Cookie Policy</Link>
+          <Link href="/accessibility" className="hover:underline cursor-pointer">Accessibility</Link>
         </div>
         <p>© 2026 CampusX · Built for students</p>
       </footer>
