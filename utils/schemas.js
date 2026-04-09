@@ -19,8 +19,9 @@ export const signupSchema = z.object({
     .max(100, 'Password cannot exceed 100 characters'),
   college: z.string().max(100).optional().default(''),
   course: z.string().max(100).optional().default(''),
-  year: z.number().int().min(1).max(6).optional().default(1),
-  gender: z.enum(['male', 'female', 'other', 'unspecified']).optional().default('unspecified')
+  year: z.coerce.number().int().min(1).max(6).optional().default(1),
+  gender: z.enum(['male', 'female', 'other', 'unspecified']).optional().default('unspecified'),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits')
 })
 
 export const objectIdSchema = z.string().refine(

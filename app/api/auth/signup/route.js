@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/db'
 import User from '@/models/User'
+import Otp from '@/models/Otp'
 import bcrypt from 'bcryptjs'
 import { signToken, setAuthCookie } from '@/lib/auth'
 import { notifyAdminNewUser } from '@/lib/admin-notify'
@@ -8,6 +9,7 @@ import { applyRateLimit } from '@/lib/redis-rate-limit'
 import { signupSchema, validateRequest } from '@/utils/schemas'
 import { successResponse, errorResponse, BadRequestError } from '@/lib/api-response'
 import { sanitizeText } from '@/lib/sanitize'
+import { isCollegeEmail, getCollegeName } from '@/lib/collegeEmails'
 
 export async function POST(request) {
   try {
@@ -34,11 +36,36 @@ export async function POST(request) {
       ))
     }
 
-    const { name, username, email, password, college, course, year, gender } = validation.data
+    const { name, username, email, password, college, course, year, gender, otp } = validation.data
 
     await connectDB()
 
-    const existingEmail = await User.findOne({ email }).lean()
+    const normalizedEmail = email.toLowerCase().trim()
+    const normalizedOtp = otp.trim()
+
+    // ── OTP Verification ──
+    const otpRecord = await Otp.findOne({ email: normalizedEmail, purpose: 'signup' })
+    if (!otpRecord) {
+      return errorResponse(new BadRequestError('OTP expired or not found. Please request a new one.'))
+    }
+
+    if (otpRecord.attempts >= 5) {
+      await Otp.deleteOne({ _id: otpRecord._id })
+      return errorResponse(new BadRequestError('Too many incorrect attempts. This OTP has been invalidated. Please request a new one.'))
+    }
+
+    if (otpRecord.otp !== normalizedOtp) {
+      otpRecord.attempts += 1
+      await otpRecord.save()
+      const remaining = 5 - otpRecord.attempts
+      return errorResponse(new BadRequestError(`Invalid OTP. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`))
+    }
+
+    // OTP Valid - delete it
+    await Otp.deleteOne({ _id: otpRecord._id })
+
+    // ── Final DB Checks ──
+    const existingEmail = await User.findOne({ email: normalizedEmail }).lean()
     if (existingEmail) {
       return errorResponse(new BadRequestError('Email already registered'))
     }
@@ -60,16 +87,36 @@ export async function POST(request) {
       avatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${seed}`
     }
 
+    // ── College email auto-detection ──
+    const collegeDetected = isCollegeEmail(normalizedEmail)
+    const detectedCollegeName = getCollegeName(normalizedEmail)
+
+    // Build verification fields based on email domain
+    const verificationFields = collegeDetected
+      ? {
+          isVerified: true,
+          verificationStatus: 'verified',
+          verificationType: 'college_email',
+          collegeEmail: normalizedEmail,
+          verificationApprovedAt: new Date(),
+        }
+      : {
+          isVerified: false,
+          verificationStatus: 'none',
+        }
+
     const user = await User.create({
       name: sanitizeText(name),
       username,
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
-      college: sanitizeText(college || ''),
+      // Auto-fill college name from domain if user didn't provide one
+      college: sanitizeText(college || '') || (detectedCollegeName || ''),
       course: sanitizeText(course || ''),
       year: parseInt(year) || 1,
       gender: gender || 'unspecified',
-      avatar
+      avatar,
+      ...verificationFields,
     })
 
     try {
@@ -91,7 +138,19 @@ export async function POST(request) {
 
     const token = signToken({ userId: user._id, username: user.username })
     const response = successResponse(
-      { user: { _id: user._id, name: user.name, username: user.username, avatar: user.avatar } },
+      {
+        user: {
+          _id: user._id,
+          name: user.name,
+          username: user.username,
+          avatar: user.avatar,
+          isVerified: user.isVerified,
+          verificationStatus: user.verificationStatus,
+        },
+        // Let the client know if this was an auto-verified college signup
+        collegeAutoVerified: collegeDetected,
+        collegeName: detectedCollegeName,
+      },
       { status: 201 }
     )
 
