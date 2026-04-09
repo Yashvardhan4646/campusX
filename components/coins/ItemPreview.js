@@ -42,7 +42,6 @@ export default function ItemPreview({ item }) {
       backgroundSize: visual.backgroundSize || 'auto', 
       WebkitBackgroundClip: 'text', 
       WebkitTextFillColor: 'transparent', 
-      backgroundClip: 'text', 
       animation: visual.animation, 
       // Fallback for unsupported browsers 
       color: 'transparent' 

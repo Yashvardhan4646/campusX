@@ -91,9 +91,7 @@ export default function Hero() {
               style={{ 
                 background: 'linear-gradient(135deg, #f59e0b, #8b5cf6, #3b82f6)', 
                 WebkitBackgroundClip: 'text', 
-                webkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                webkitTextFillColor: 'transparent'
+                WebkitTextFillColor: 'transparent'
               }} 
             >
               Campus.

@@ -24,7 +24,6 @@ const CoinUsername = memo(function CoinUsername({
           backgroundSize: colorVisual.backgroundSize || '200% auto', 
           WebkitBackgroundClip: 'text', 
           WebkitTextFillColor: 'transparent', 
-          backgroundClip: 'text', 
           animation: colorVisual.animation, 
           // Fallback for unsupported browsers 
           color: '#f59e0b' 
@@ -44,7 +43,6 @@ const CoinUsername = memo(function CoinUsername({
           backgroundSize: colorVisual.backgroundSize || 'auto', 
           WebkitBackgroundClip: 'text', 
           WebkitTextFillColor: 'transparent', 
-          backgroundClip: 'text', 
           animation: colorVisual.animation, 
           // Fallback for unsupported browsers 
           color: 'transparent' 

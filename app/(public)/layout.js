@@ -1,4 +1,5 @@
 import "../globals.css";
+import Navbar from "@/components/landing/Navbar";
 
 export const metadata = {
   title: 'CampusX — Your Campus Community',
@@ -15,6 +16,7 @@ export const metadata = {
 export default function PublicLayout({ children }) {
   return (
     <div className="bg-[#0f0f0f] text-[#f0f0f0] antialiased min-h-screen">
+      <Navbar />
       {children}
     </div>
   );
