@@ -2,17 +2,17 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap, shouldAnimate } from '@/lib/gsap-config'
-import { Users, FileText, GraduationCap, BookOpen } from 'lucide-react'
+import { Users, FileText, BookOpen, Code } from 'lucide-react'
 
-export default function Stats({ users = 0, posts = 0, resources = 0, communities = 0 }) {
+export default function Stats({ users = 0, posts = 0, resources = 0, codeAreas = 0 }) {
   const sectionRef = useRef(null)
   const numberRefs = useRef([])
 
   const STATS_CONFIG = [
-    { label: 'Students', value: users, suffix: '+', icon: Users, color: 'from-blue-500/20 to-cyan-500/20' },
-    { label: 'Posts Shared', value: posts, suffix: '+', icon: FileText, color: 'from-purple-500/20 to-pink-500/20' },
-    { label: 'Study Resources', value: resources, suffix: '+', icon: BookOpen, color: 'from-emerald-500/20 to-teal-500/20' },
-    { label: 'Communities', value: communities, suffix: '', icon: GraduationCap, color: 'from-orange-500/20 to-yellow-500/20' }
+    { label: 'Users', value: users, suffix: '+', icon: Users, color: 'from-blue-500/20 to-cyan-500/20' },
+    { label: 'Posts', value: posts, suffix: '+', icon: FileText, color: 'from-purple-500/20 to-pink-500/20' },
+    { label: 'Resources', value: resources, suffix: '+', icon: BookOpen, color: 'from-emerald-500/20 to-teal-500/20' },
+    { label: 'Code Areas', value: codeAreas, suffix: '', icon: Code, color: 'from-orange-500/20 to-yellow-500/20' }
   ]
 
   useEffect(() => {
@@ -49,39 +49,44 @@ export default function Stats({ users = 0, posts = 0, resources = 0, communities
 
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
-  }, [users, posts, resources, communities])
+  }, [users, posts, resources, codeAreas])
 
   return (
     <section className="py-24 px-4 relative overflow-hidden bg-[#0f0f0f]">
-      {/* Decorative background elements */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl" />
-
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" ref={sectionRef}>
           {STATS_CONFIG.map((stat, i) => (
-            <div 
-              key={i} 
-              className={`relative group p-8 rounded-3xl border border-white/5 bg-gradient-to-br ${stat.color} backdrop-blur-md transition-all duration-500 hover:border-white/10 hover:-translate-y-1`}
-            >
-              <div className="flex flex-col items-center gap-4 text-center">
+            <div key={i} className="relative p-6 rounded-3xl overflow-hidden bg-[#0f0f0f] group border border-white/5">
+              {/* decorative grid pattern */}
+              <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" viewBox="0 0 200 200" preserveAspectRatio="none" aria-hidden>
+                <rect width="100%" height="100%" fill="none" />
+                <g stroke="#2a2a2a" strokeWidth="0.8" fill="#ffffff14">
+                  <circle cx="20" cy="20" r="2" />
+                  <circle cx="60" cy="40" r="2" />
+                  <circle cx="120" cy="30" r="2" />
+                  <circle cx="170" cy="70" r="2" />
+                  <circle cx="30" cy="120" r="2" />
+                  <circle cx="80" cy="160" r="2" />
+                </g>
+              </svg>
+
+              <div className="relative z-10 flex flex-col items-center gap-4 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center shadow-inner border border-white/5">
                   <stat.icon className="w-7 h-7 text-white/80" />
                 </div>
-                <div className="space-y-1">
-                  <div
-                    className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter"
-                    ref={el => numberRefs.current[i] = el}
-                  >
-                    {stat.value}{stat.suffix}
-                  </div>
-                  <div className="text-white/40 text-sm font-bold uppercase tracking-widest">
-                    {stat.label}
-                  </div>
+
+                <div
+                  className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter"
+                  ref={el => numberRefs.current[i] = el}
+                >
+                  {stat.value}{stat.suffix}
+                </div>
+
+                <div className="text-white/40 text-sm font-bold uppercase tracking-widest">
+                  {stat.label}
                 </div>
               </div>
-              
-              {/* Subtle light effect on hover */}
+
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </div>
           ))}
