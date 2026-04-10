@@ -61,7 +61,7 @@ function ImageCell({ url, ratio, onClick }) {
     >
       <Image
         src={url}
-        alt=""
+        alt="Post image"
         fill
         loading="lazy"
         sizes="(max-width: 768px) 100vw, 600px"

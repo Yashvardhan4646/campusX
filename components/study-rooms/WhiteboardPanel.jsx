@@ -389,11 +389,11 @@ export default function WhiteboardPanel({ roomId, currentUser }) {
       <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/80 shrink-0">
         <div className="flex items-center gap-2">
           <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-zinc-200">
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </AlertDialogTrigger>
+<AlertDialogTrigger asChild>
+  <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-zinc-200" aria-label="Clear canvas">
+    <Trash2 className="w-4 h-4" />
+  </Button>
+</AlertDialogTrigger>
             <AlertDialogContent className="bg-zinc-900 border-zinc-800">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-zinc-100">Clear Canvas?</AlertDialogTitle>
@@ -446,9 +446,9 @@ export default function WhiteboardPanel({ roomId, currentUser }) {
             </div>
           )}
 
-          <Button variant="ghost" size="icon" onClick={handleExport} className="text-zinc-400 hover:text-zinc-200">
-            <Download className="w-4 h-4" />
-          </Button>
+<Button variant="ghost" size="icon" onClick={handleExport} className="text-zinc-400 hover:text-zinc-200" aria-label="Export as PNG">
+  <Download className="w-4 h-4" />
+</Button>
         </div>
       </div>
 

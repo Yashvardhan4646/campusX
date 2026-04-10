@@ -144,24 +144,24 @@ export default function PersonalWhiteboard() {
     <div className="flex flex-col h-full w-full overflow-hidden bg-zinc-950">
       <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/80 shrink-0 z-10">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/feed")}
-            className="text-zinc-400 hover:text-zinc-200"
-            title="Go Back"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => router.push("/feed")}
+  className="text-zinc-400 hover:text-zinc-200"
+  aria-label="Go back"
+>
+  <ArrowLeft className="w-4 h-4" />
+</Button>
 
           <div className="w-px h-6 bg-zinc-700 mx-1" />
 
           <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-zinc-200">
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </AlertDialogTrigger>
+<AlertDialogTrigger asChild>
+  <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-zinc-200" aria-label="Clear canvas">
+    <Trash2 className="w-4 h-4" />
+  </Button>
+</AlertDialogTrigger>
             <AlertDialogContent className="bg-zinc-900 border-zinc-800">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-zinc-100">Clear Canvas?</AlertDialogTitle>
@@ -181,24 +181,24 @@ export default function PersonalWhiteboard() {
           </AlertDialog>
 
           <div className="flex items-center gap-1 ml-2 border-l border-zinc-700 pl-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleUndo}
-              className="text-zinc-400 hover:text-zinc-200"
-              title="Undo"
-            >
-              <Undo className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleRedo}
-              className="text-zinc-400 hover:text-zinc-200"
-              title="Redo"
-            >
-              <Redo className="w-4 h-4" />
-            </Button>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={handleUndo}
+  className="text-zinc-400 hover:text-zinc-200"
+  aria-label="Undo"
+>
+  <Undo className="w-4 h-4" />
+</Button>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={handleRedo}
+  className="text-zinc-400 hover:text-zinc-200"
+  aria-label="Redo"
+>
+  <Redo className="w-4 h-4" />
+</Button>
           </div>
         </div>
 
@@ -208,15 +208,15 @@ export default function PersonalWhiteboard() {
           )}
 
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleExport}
-            className="text-zinc-400 hover:text-zinc-200"
-            title="Export as PNG"
-          >
-            <Download className="w-4 h-4" />
-          </Button>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={handleExport}
+  className="text-zinc-400 hover:text-zinc-200"
+  aria-label="Export as PNG"
+>
+  <Download className="w-4 h-4" />
+</Button>
         </div>
       </div>
 

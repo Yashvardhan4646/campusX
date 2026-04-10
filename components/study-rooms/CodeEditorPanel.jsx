@@ -430,23 +430,23 @@ export default function CodeEditorPanel({ roomId, currentUser, initialCode, init
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs">
-              {connectionStatus === "connected" ? (
-                <><Wifi className="w-3.5 h-3.5 text-green-500" /><span className="text-green-500">Live</span></>
-              ) : (
-                <><WifiOff className="w-3.5 h-3.5 text-red-500" /><span className="text-red-500">Offline</span></>
-              )}
-            </div>
+<div className="flex items-center gap-3">
+  <div className="flex items-center gap-1.5 text-xs">
+    {connectionStatus === "connected" ? (
+      <><Wifi className="w-3.5 h-3.5 text-green-500" /><span className="text-green-500">Live</span></>
+    ) : (
+      <><WifiOff className="w-3.5 h-3.5 text-red-500" /><span className="text-red-500">Offline</span></>
+    )}
+  </div>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={handleCopyCode} className="text-zinc-400 hover:text-zinc-200">
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy</TooltipContent>
-            </Tooltip>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" onClick={handleCopyCode} className="text-zinc-400 hover:text-zinc-200" aria-label="Copy code">
+        <Copy className="w-4 h-4" />
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>Copy</TooltipContent>
+  </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>

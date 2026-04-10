@@ -1,15 +1,17 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import dynamic from "next/dynamic";
 import HeroClient from '@/components/landing/HeroClient'
-import Features from "@/components/landing/Features";
-import Stats from "@/components/landing/Stats";
-import Footer from "@/components/landing/Footer";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Post from "@/models/Post";
 import Resource from "@/models/Resource";
 import StudyRoom from '@/models/StudyRoom';
 import { verifyToken } from "@/lib/auth-edge";
+
+const Stats = dynamic(() => import("@/components/landing/Stats"))
+const Features = dynamic(() => import("@/components/landing/Features"))
+const Footer = dynamic(() => import("@/components/landing/Footer"))
 
 export const metadata = {
   title: "CampusX — Social Network for Indian College Students",
@@ -77,7 +79,7 @@ export default async function LandingPage() {
   return (
     <main>
       <HeroClient />
-      <Stats 
+      <Stats
         users={stats.users}
         posts={stats.posts}
         resources={stats.resources}

@@ -198,11 +198,11 @@ export default function PostComposer({
             images: uploadedImageUrls,
             linkPreview: linkPreview
                 ? {
-                      title: linkPreview.title,
-                      description: linkPreview.description,
-                      image: linkPreview.image,
-                      url: linkPreview.url,
-                  }
+                    title: linkPreview.title,
+                    description: linkPreview.description,
+                    image: linkPreview.image,
+                    url: linkPreview.url,
+                }
                 : null,
             isMarkdown: containsMd,
         };
@@ -287,7 +287,7 @@ export default function PostComposer({
                     {!isMarkdownPreview && (
                         <Textarea
                             placeholder="What's happening on campus?"
-                            className="resize-none border-none bg-transparent text-lg focus-visible:ring-1 p-2 min-h-25 font-sans-serif focus-visible:ring-primary/50 focus-visible:ring-offset-0 focus-visible:ring-offset-background"
+                            className="resize-none border-none bg-transparent text-lg focus-visible:ring-1 p-2 min-h-25 font-sans-serif focus-visible:ring-primary/50 focus-visible:ring-offset-0 focus-visible:ring-offset-background bg-card/80 backdrop-blur-sm"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             maxLength={2000}
@@ -339,8 +339,8 @@ export default function PostComposer({
                                             alt=""
                                             className="w-full h-full object-cover"
                                             onError={(e) =>
-                                                (e.currentTarget.style.display =
-                                                    "none")
+                                            (e.currentTarget.style.display =
+                                                "none")
                                             }
                                         />
                                     </div>
@@ -381,13 +381,13 @@ export default function PostComposer({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 rounded-full"
-                                onClick={() => {
-                                    setShowTagInput(false);
-                                    setManualCommunity("");
-                                }}
+                                className="h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3"
+                                onClick={() =>
+                                    setShowTagInput(true)
+                                }
+                                aria-label="Tag college or community"
                             >
-                                <X className="w-3 h-3" />
+                                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Button>
                         </div>
                     )}
@@ -468,6 +468,7 @@ export default function PostComposer({
                                             : "text-muted-foreground hover:text-primary",
                                     )}
                                     onClick={() => setShowPoll(!showPoll)}
+                                    aria-label="Create a poll"
                                 >
                                     <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </Button>
@@ -496,6 +497,7 @@ export default function PostComposer({
                                         fileInputRef.current?.click()
                                     }
                                     disabled={selectedImages.length >= 6}
+                                    aria-label="Add image"
                                 >
                                     <ImagePlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     {selectedImages.length > 0 ? (
@@ -503,9 +505,7 @@ export default function PostComposer({
                                             {selectedImages.length}/6
                                         </span>
                                     ) : (
-                                        <span className="text-[10px] sm:text-xs">
-                                            
-                                        </span>
+                                        <span className="text-[10px] sm:text-xs"></span>
                                     )}
                                 </Button>
 

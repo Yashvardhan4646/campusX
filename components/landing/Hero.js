@@ -17,20 +17,20 @@ export default function Hero() {
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-    tl.fromTo(headlineRef.current, 
-      { opacity: 0, y: 40 }, 
+    tl.fromTo(headlineRef.current,
+      { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 1 }
     )
-    .fromTo(subRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.8 }, 
-      '-=0.6'
-    )
-    .fromTo(ctaRef.current, 
-      { opacity: 0, y: 20 }, 
-      { opacity: 1, y: 0, duration: 0.6 }, 
-      '-=0.4'
-    )
+      .fromTo(subRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        '-=0.6'
+      )
+      .fromTo(ctaRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        '-=0.4'
+      )
 
     // Floating animation for background elements
     const elements = floatingRef.current?.children
@@ -58,14 +58,14 @@ export default function Hero() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-orange-500/5 rounded-full blur-3xl opacity-30" />
-        
+
         {/* Subtle grid */}
-        <div 
-          className="absolute inset-0 opacity-[0.03]" 
-          style={{ 
-            backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
-            backgroundSize: '64px 64px' 
-          }} 
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+            backgroundSize: '64px 64px'
+          }}
         />
       </div>
 
@@ -81,25 +81,25 @@ export default function Hero() {
 
         {/* Headline — GSAP animated on mount */}
         <div className="space-y-4">
-          <h1 
-            ref={headlineRef} 
+          <h1
+            ref={headlineRef}
             className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] text-white"
           >
             Connect with your <br />
-            <span 
-              className="inline-block" 
-              style={{ 
-                background: 'linear-gradient(135deg, #f59e0b, #8b5cf6, #3b82f6)', 
-                WebkitBackgroundClip: 'text', 
+            <span
+              className="inline-block"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b, #8b5cf6, #3b82f6)',
+                WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
-              }} 
+              }}
             >
               Campus.
             </span>
           </h1>
         </div>
-        <p 
-          ref={subRef} 
+        <p
+          ref={subRef}
           className="text-lg md:text-xl lg:text-2xl text-white/60 max-w-2xl mx-auto leading-relaxed font-medium"
         >
           Join a thriving community of students. Share updates, <br className="hidden md:block" />
