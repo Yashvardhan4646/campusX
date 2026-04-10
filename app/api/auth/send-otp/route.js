@@ -33,7 +33,7 @@ export async function POST(request) {
       return errorResponse(new BadRequestError('Invalid email format'))
     }
 
-    if (!['signup', 'verification'].includes(purpose)) {
+    if (!['signup', 'verification', 'email_change', 'account_delete'].includes(purpose)) {
       return errorResponse(new BadRequestError('Invalid OTP purpose'))
     }
 
