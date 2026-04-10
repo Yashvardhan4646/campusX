@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -105,9 +106,15 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
         {/* Avatar */}
         <div className="flex flex-col items-center py-5 border-b border-border">
           <div className="relative group cursor-pointer" onClick={triggerFileInput}>
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-accent border-2 border-border flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-accent border-2 border-border relative flex items-center justify-center">
               {(avatarPreview || user?.avatar) ? (
-                <img src={avatarPreview || user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                <Image 
+                  src={avatarPreview || user.avatar} 
+                  alt="Avatar" 
+                  fill 
+                  className="object-cover"
+                  sizes="80px"
+                />
               ) : (
                 <span className="text-2xl font-bold text-muted-foreground">{user?.name?.[0]?.toUpperCase()}</span>
               )}

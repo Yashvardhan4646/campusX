@@ -7,6 +7,7 @@ import {
   Bell, 
   Lock, 
   Eye, 
+  EyeOff,
   User, 
   Shield, 
   ShieldCheck,
@@ -19,6 +20,10 @@ import {
   Clock,
   Upload,
   AlertTriangle,
+  Trash2,
+  KeyRound,
+  Mail,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -29,12 +34,55 @@ import PushSettings from '@/components/notifications/PushSettings'
 import ConfirmDeleteModal from '@/components/chat/ConfirmDeleteModal'
 import EditProfileDrawer from '@/components/user/EditProfileDrawer'
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
+
 export default function SettingsPage() {
   const router = useRouter()
   const { user, loading: userLoading, refetch: refetchUser } = useUser()
 
   const [saving, setSaving] = useState(false)
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
+
+  // ── Feature 1: Change Password State ──
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+  const [passLoading, setPassLoading] = useState(false)
+  const [showOldPass, setShowOldPass] = useState(false)
+  const [showNewPass, setShowNewPass] = useState(false)
+  const [showConfirmPass, setShowConfirmPass] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
+
+  // ── Feature 2: Change Email State ──
+  const [changeEmailOpen, setChangeEmailOpen] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [emailStep, setEmailStep] = useState(1) // 1: Email, 2: OTP
+  const [emailForm, setEmailForm] = useState({ newEmail: '', otp: '' })
+  const [emailCountdown, setEmailCountdown] = useState(0)
+
+  // ── Feature 3: Delete Account State ──
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteStep, setDeleteStep] = useState(1) // 1: Warning, 2: OTP
+  const [deleteOtp, setDeleteOtp] = useState('')
+  const [deleteCountdown, setDeleteCountdown] = useState(0)
   
   // Local state for toggles (Only keeping features that can be implemented now)
   const [settings, setSettings] = useState({
@@ -42,6 +90,162 @@ export default function SettingsPage() {
     privateProfile: false,
     showOnlineStatus: true,
   })
+
+  // ── Countdown Timer Logic ──
+  useEffect(() => {
+    let timer
+    if (emailCountdown > 0) {
+      timer = setInterval(() => setEmailCountdown(prev => prev - 1), 1000)
+    }
+    return () => clearInterval(timer)
+  }, [emailCountdown])
+
+  useEffect(() => {
+    let timer
+    if (deleteCountdown > 0) {
+      timer = setInterval(() => setDeleteCountdown(prev => prev - 1), 1000)
+    }
+    return () => clearInterval(timer)
+  }, [deleteCountdown])
+
+  // ── Password Strength / Validation Logic ──
+  const passwordConditions = {
+    length: passwordForm.newPassword.length >= 8,
+    uppercase: /[A-Z]/.test(passwordForm.newPassword),
+    number: /[0-9]/.test(passwordForm.newPassword),
+  }
+
+  const getPasswordStrength = () => {
+    const met = Object.values(passwordConditions).filter(Boolean).length
+    if (passwordForm.newPassword === '') return { label: '', color: 'bg-muted', value: 0 }
+    if (met === 3) return { label: 'Strong', color: 'bg-green-500', value: 100 }
+    if (met === 2) return { label: 'Medium', color: 'bg-yellow-500', value: 66 }
+    return { label: 'Weak', color: 'bg-red-500', value: 33 }
+  }
+
+  // ── Shared OTP Request Logic ──
+  const requestOtp = async (email, purpose) => {
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, purpose })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || 'Failed to send OTP')
+      
+      toast.success('OTP sent to your email')
+      return true
+    } catch (error) {
+      toast.error(error.message)
+      return false
+    }
+  }
+
+  // ── Feature 1: Change Password Handler ──
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      return toast.error("Passwords don't match")
+    }
+    if (!Object.values(passwordConditions).every(Boolean)) {
+      return toast.error("Please meet all password requirements")
+    }
+
+    try {
+      setPassLoading(true)
+      const res = await fetch('/api/users/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          oldPassword: passwordForm.oldPassword, 
+          newPassword: passwordForm.newPassword 
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || 'Failed to change password')
+      
+      toast.success("Password updated successfully")
+      setChangePasswordOpen(false)
+      setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' })
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setPassLoading(false)
+    }
+  }
+
+  // ── Feature 2: Change Email Handlers ──
+  const handleSendEmailOtp = async () => {
+    if (!emailForm.newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailForm.newEmail)) {
+      return toast.error("Invalid email address")
+    }
+    setEmailLoading(true)
+    const success = await requestOtp(emailForm.newEmail, 'email_change')
+    setEmailLoading(false)
+    if (success) {
+      setEmailStep(2)
+      setEmailCountdown(60)
+    }
+  }
+
+  const handleVerifyEmail = async () => {
+    if (emailForm.otp.length !== 6) return toast.error("Enter a 6-digit OTP")
+    
+    try {
+      setEmailLoading(true)
+      const res = await fetch('/api/users/change-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailForm)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || 'Verification failed')
+      
+      toast.success("Email updated successfully")
+      setChangeEmailOpen(false)
+      setEmailForm({ newEmail: '', otp: '' })
+      setEmailStep(1)
+      refetchUser()
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  // ── Feature 3: Delete Account Handlers ──
+  const handleSendDeleteOtp = async () => {
+    setDeleteLoading(true)
+    const success = await requestOtp(user?.email, 'account_delete')
+    setDeleteLoading(false)
+    if (success) {
+      setDeleteStep(2)
+      setDeleteCountdown(60)
+    }
+  }
+
+  const handleFinalDelete = async () => {
+    if (deleteOtp.length !== 6) return toast.error("Enter a 6-digit OTP")
+    
+    try {
+      setDeleteLoading(true)
+      const res = await fetch('/api/users/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: deleteOtp })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error?.message || 'Deletion failed')
+      
+      toast.success("Account permanently deleted")
+      // Force redirect to goodbye page
+      window.location.href = '/goodbye'
+    } catch (error) {
+      toast.error(error.message)
+      setDeleteLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (user?.settings) {
@@ -140,12 +344,40 @@ export default function SettingsPage() {
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/50 rounded-2xl border border-border transition-colors">
+            <button 
+              onClick={() => setChangeEmailOpen(true)}
+              className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/50 rounded-2xl border border-border transition-colors group"
+            >
               <div className="flex flex-col items-start">
-                <span className="font-semibold text-sm">Email Address</span>
+                <span className="font-semibold text-sm group-hover:text-primary transition-colors">Email Address</span>
                 <span className="text-xs text-muted-foreground">{user?.email}</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </section>
+
+        {/* Security Section (Feature 1) */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-primary">
+            <Lock className="w-5 h-5" />
+            <h2 className="font-bold uppercase tracking-wider text-xs">Security</h2>
+          </div>
+          <div className="space-y-2">
+            <button 
+              onClick={() => setChangePasswordOpen(true)}
+              className="w-full flex items-center justify-between p-4 bg-card hover:bg-accent/50 rounded-2xl border border-border transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold text-sm group-hover:text-primary transition-colors">Change Password</span>
+                  <span className="text-xs text-muted-foreground">Update your account password</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </section>
@@ -304,6 +536,22 @@ export default function SettingsPage() {
               <span className="text-[10px] opacity-80 italic uppercase tracking-tighter">Sign out of your account</span>
             </div>
           </Button>
+
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              setDeleteStep(1)
+              setDeleteAccountOpen(true)
+            }}
+            className="w-full justify-start gap-4 h-14 px-4 text-destructive hover:bg-destructive/10 rounded-2xl border border-destructive/20 mt-3"
+          >
+            <Trash2 className="w-5 h-5" />
+            <div className="flex flex-col items-start">
+              <span className="font-bold text-sm">Delete Account</span>
+              <span className="text-[10px] opacity-80 italic uppercase tracking-tighter">Permanently remove your data</span>
+            </div>
+          </Button>
+
           <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-widest font-bold opacity-50">
             CampusX v0.1.0 • Built with ❤️ for Students
           </p>
@@ -318,6 +566,266 @@ export default function SettingsPage() {
         onOpenChange={setEditDrawerOpen}
         onSave={handleEditSave}
       />
+
+      {/* Feature 1: Change Password Sheet */}
+      <Sheet open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+        <SheetContent side="bottom" className="rounded-t-[2rem] border-t-primary/20 bg-card p-6 pb-12 max-w-2xl mx-auto">
+          <SheetHeader className="pb-6">
+            <SheetTitle className="text-2xl font-bold flex items-center gap-2">
+              <Lock className="w-6 h-6 text-primary" /> Change Password
+            </SheetTitle>
+            <SheetDescription>
+              Keep your account secure by updating your password regularly.
+            </SheetDescription>
+          </SheetHeader>
+
+          <form onSubmit={handlePasswordChange} className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Current Password</Label>
+                <div className="relative">
+                  <Input 
+                    type={showOldPass ? "text" : "password"} 
+                    placeholder="••••••••"
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, oldPassword: e.target.value})}
+                    className="pr-10 bg-background border-border rounded-xl h-12"
+                    required
+                  />
+                  <button type="button" onClick={() => setShowOldPass(!showOldPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showOldPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>New Password</Label>
+                <div className="relative">
+                  <Input 
+                    type={showNewPass ? "text" : "password"} 
+                    placeholder="••••••••"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                    className="pr-10 bg-background border-border rounded-xl h-12"
+                    required
+                  />
+                  <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                
+                {passwordForm.newPassword && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                      <span className="text-muted-foreground">Strength</span>
+                      <span style={{ color: getPasswordStrength().color.replace('bg-', '') }}>{getPasswordStrength().label}</span>
+                    </div>
+                    <Progress value={getPasswordStrength().value} className="h-1.5" indicatorClassName={getPasswordStrength().color} />
+                    
+                    <div className="grid grid-cols-1 gap-1.5 pt-2">
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <CheckCircle2 className={`w-3.5 h-3.5 ${passwordConditions.length ? 'text-green-500' : 'text-muted-foreground/30'}`} />
+                        <span className={passwordConditions.length ? 'text-foreground' : 'text-muted-foreground'}>Min 8 characters</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <CheckCircle2 className={`w-3.5 h-3.5 ${passwordConditions.uppercase ? 'text-green-500' : 'text-muted-foreground/30'}`} />
+                        <span className={passwordConditions.uppercase ? 'text-foreground' : 'text-muted-foreground'}>At least 1 uppercase</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <CheckCircle2 className={`w-3.5 h-3.5 ${passwordConditions.number ? 'text-green-500' : 'text-muted-foreground/30'}`} />
+                        <span className={passwordConditions.number ? 'text-foreground' : 'text-muted-foreground'}>At least 1 number</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Confirm New Password</Label>
+                <div className="relative">
+                  <Input 
+                    type={showConfirmPass ? "text" : "password"} 
+                    placeholder="••••••••"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                    className="pr-10 bg-background border-border rounded-xl h-12"
+                    required
+                  />
+                  <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <Button type="submit" disabled={passLoading} className="w-full h-12 rounded-xl text-base font-bold">
+              {passLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : "Save New Password"}
+            </Button>
+          </form>
+        </SheetContent>
+      </Sheet>
+
+      {/* Feature 2: Change Email Sheet */}
+      <Sheet open={changeEmailOpen} onOpenChange={setChangeEmailOpen}>
+        <SheetContent side="bottom" className="rounded-t-[2rem] border-t-primary/20 bg-card p-6 pb-12 max-w-2xl mx-auto">
+          <SheetHeader className="pb-6">
+            <SheetTitle className="text-2xl font-bold flex items-center gap-2">
+              <Mail className="w-6 h-6 text-primary" /> Change Email
+            </SheetTitle>
+            <SheetDescription>
+              We'll send a verification code to your new email address.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {emailStep === 1 ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>New Email Address</Label>
+                  <Input 
+                    type="email" 
+                    placeholder="new@college.edu"
+                    value={emailForm.newEmail}
+                    onChange={(e) => setEmailForm({...emailForm, newEmail: e.target.value})}
+                    className="bg-background border-border rounded-xl h-12"
+                  />
+                </div>
+                <Button onClick={handleSendEmailOtp} disabled={emailLoading} className="w-full h-12 rounded-xl text-base font-bold">
+                  {emailLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : "Send OTP"}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-2 text-center">
+                  <Label className="text-muted-foreground">Enter the 6-digit code sent to {emailForm.newEmail}</Label>
+                  <div className="flex justify-center pt-4">
+                    <Input 
+                      className="w-48 text-center text-2xl font-bold tracking-[0.5em] h-14 bg-background border-border rounded-xl"
+                      maxLength={6}
+                      value={emailForm.otp}
+                      onChange={(e) => setEmailForm({...emailForm, otp: e.target.value.replace(/\D/g, '')})}
+                      placeholder="••••••"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-3">
+                  <Button onClick={handleVerifyEmail} disabled={emailLoading} className="w-full h-12 rounded-xl text-base font-bold">
+                    {emailLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : "Verify & Update"}
+                  </Button>
+                  
+                  <div className="flex justify-center">
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleSendEmailOtp} 
+                      disabled={emailCountdown > 0 || emailLoading}
+                      className="text-xs font-semibold"
+                    >
+                      {emailCountdown > 0 ? (
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3 h-3" /> Resend in {emailCountdown}s
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5">
+                          <RefreshCw className="w-3 h-3" /> Resend OTP
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Feature 3: Delete Account Alert Dialog */}
+      <AlertDialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen}>
+        <AlertDialogContent className="max-w-[400px] rounded-3xl border-destructive/20 bg-card p-6">
+          {deleteStep === 1 ? (
+            <>
+              <AlertDialogHeader className="items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-10 h-10 text-destructive" />
+                </div>
+                <AlertDialogTitle className="text-2xl font-bold text-destructive">Delete Account?</AlertDialogTitle>
+                <AlertDialogDescription className="text-base leading-relaxed">
+                  This will permanently delete your account, all posts, coins, and data. This action <span className="font-bold text-foreground underline underline-offset-4">cannot be undone</span>.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col gap-2 mt-6 sm:flex-col">
+                <Button 
+                  onClick={handleSendDeleteOtp} 
+                  disabled={deleteLoading}
+                  variant="destructive" 
+                  className="w-full h-12 rounded-xl font-bold text-base"
+                >
+                  {deleteLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : "Send Confirmation OTP"}
+                </Button>
+                <AlertDialogCancel className="w-full h-12 rounded-xl border-border bg-transparent hover:bg-accent text-base mt-2">
+                  Cancel
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </>
+          ) : (
+            <>
+              <AlertDialogHeader className="items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Shield className="w-10 h-10 text-primary" />
+                </div>
+                <AlertDialogTitle className="text-2xl font-bold">Confirm Deletion</AlertDialogTitle>
+                <AlertDialogDescription className="text-base">
+                  Enter the 6-digit code sent to <strong>{user?.email}</strong>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              
+              <div className="flex justify-center py-6">
+                <Input 
+                  className="w-48 text-center text-2xl font-bold tracking-[0.5em] h-14 bg-background border-border rounded-xl"
+                  maxLength={6}
+                  value={deleteOtp}
+                  onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••••"
+                />
+              </div>
+
+              <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+                <Button 
+                  onClick={handleFinalDelete} 
+                  disabled={deleteLoading}
+                  variant="destructive" 
+                  className="w-full h-12 rounded-xl font-bold text-base shadow-lg shadow-destructive/20"
+                >
+                  {deleteLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : "Permanently Delete"}
+                </Button>
+                
+                <div className="flex justify-center mt-2">
+                   <Button 
+                    variant="ghost" 
+                    onClick={handleSendDeleteOtp} 
+                    disabled={deleteCountdown > 0 || deleteLoading}
+                    className="text-xs font-semibold"
+                  >
+                    {deleteCountdown > 0 ? (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" /> Resend in {deleteCountdown}s
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-primary">
+                        <RefreshCw className="w-3 h-3" /> Resend OTP
+                      </span>
+                    )}
+                  </Button>
+                </div>
+
+                <AlertDialogCancel className="w-full h-12 rounded-xl border-border bg-transparent hover:bg-accent text-base mt-2">
+                  Cancel
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
