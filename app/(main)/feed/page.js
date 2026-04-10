@@ -17,33 +17,33 @@ import { RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Lazy load heavy components
-const PostComposer = dynamic( 
-  () => import('@/components/post/PostComposer'), 
-  { 
+const PostComposer = dynamic(
+  () => import('@/components/post/PostComposer'),
+  {
     ssr: false,
-    loading: () => ( 
-      <div className="border-b border-border p-4 animate-pulse"> 
-        <div className="flex gap-3"> 
-          <div className="w-10 h-10 rounded-full bg-accent" /> 
-          <div className="flex-1 h-10 bg-accent rounded-lg" /> 
-        </div> 
-      </div> 
-    ) 
-  } 
+    loading: () => (
+      <div className="border-b border-border p-4 animate-pulse">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-accent" />
+          <div className="flex-1 h-10 bg-accent rounded-lg" />
+        </div>
+      </div>
+    )
+  }
 )
 
 export default function FeedPage() {
   const { user: currentUser, refetch: refetchCurrentUser } = useUser()
-  const { 
-    posts, 
-    loading, 
+  const {
+    posts,
+    loading,
     error,
-    hasMore, 
-    loadMore, 
-    addPost, 
-    removePost, 
+    hasMore,
+    loadMore,
+    addPost,
+    removePost,
     updatePostLike,
-    refresh: refreshPosts 
+    refresh: refreshPosts
   } = usePosts()
 
   const { newPostsAvailable, resetNewPosts } = useFeedUpdates()
@@ -86,7 +86,7 @@ export default function FeedPage() {
           Hey, {currentUser?.name || 'User'}
         </h1>
       </div>
-      
+
       {/* Post composer */}
       <PostComposer onPostCreated={handlePostCreated} />
 
@@ -96,9 +96,9 @@ export default function FeedPage() {
       {/* New posts toast/button */}
       {newPostsAvailable > 0 && (
         <div className="sticky top-18.25 z-10 flex justify-center py-2 animate-in fade-in slide-in-from-top-2">
-          <Button 
-            variant="secondary" 
-            size="sm" 
+          <Button
+            variant="secondary"
+            size="sm"
             className="rounded-full shadow-lg border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 gap-2 font-bold"
             onClick={handleRefreshFeed}
           >
@@ -107,37 +107,37 @@ export default function FeedPage() {
           </Button>
         </div>
       )}
-      
+
       {/* Posts list */}
       <div className="flex-1">
         {loading && posts.length === 0 ? (
           Array(5).fill(0).map((_, i) => <PostSkeleton key={i} />)
         ) : posts.length === 0 ? (
-          <EmptyState 
-            icon={FileText} 
-            title="No posts yet" 
-            description="Be the first to post what's happening on campus!" 
+          <EmptyState
+            icon={FileText}
+            title="No posts yet"
+            description="Be the first to post what's happening on campus!"
           />
         ) : (
           <>
             <div className="divide-y divide-border">
               {posts.map(post => (
-                <PostCard 
-                  key={post._id} 
-                  post={post} 
-                  currentUserId={currentUser?._id} 
-                  onDelete={handleDeletePost} 
-                  onLike={handleLikePost} 
+                <PostCard
+                  key={post._id}
+                  post={post}
+                  currentUserId={currentUser?._id}
+                  onDelete={handleDeletePost}
+                  onLike={handleLikePost}
                 />
               ))}
             </div>
-            
+
             <div ref={sentinelRef}>
-              <InfiniteScrollSentinel 
-                loading={loading} 
-                hasMore={hasMore} 
-                error={error} 
-                onRetry={loadMore} 
+              <InfiniteScrollSentinel
+                loading={loading}
+                hasMore={hasMore}
+                error={error}
+                onRetry={loadMore}
               />
             </div>
           </>

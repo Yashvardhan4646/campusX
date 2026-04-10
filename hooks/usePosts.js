@@ -11,7 +11,7 @@ export function usePosts(queryParams = {}, initialPosts = []) {
 
   const fetchPosts = useCallback(async (pageNum, append = false) => {
     if (loading) return  // loading lock
-    
+
     // If we have initial posts and we're on page 1, don't fetch unless explicitly told to
     if (pageNum === 1 && initialPosts.length > 0 && !append) {
       setLoading(false)
@@ -20,20 +20,20 @@ export function usePosts(queryParams = {}, initialPosts = []) {
 
     setLoading(true)
     setError(null)
-    
+
     try {
       const params = new URLSearchParams({
         page: pageNum,
-        limit: 20,
+        limit: 5,
         ...queryParams
       })
-      
+
       const res = await fetch(`/api/posts/get?${params.toString()}`)
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.message || 'Failed to fetch posts')
       }
-      
+
       const { posts: newPosts, hasMore: more } = await res.json()
 
       if (append) {
@@ -41,7 +41,7 @@ export function usePosts(queryParams = {}, initialPosts = []) {
       } else {
         setPosts(newPosts)
       }
-      
+
       setHasMore(more)
       setPage(pageNum)
     } catch (err) {
@@ -64,12 +64,12 @@ export function usePosts(queryParams = {}, initialPosts = []) {
     fetchPosts(nextPage, true)  // append = true
   }, [page, hasMore, loading, fetchPosts])
 
-  return { 
-    posts, 
-    loading, 
-    error, 
-    hasMore, 
-    loadMore, 
+  return {
+    posts,
+    loading,
+    error,
+    hasMore,
+    loadMore,
     refresh: () => fetchPosts(1, false),
     addPost: (post) => setPosts(prev => [post, ...prev]),
     removePost: (id) => setPosts(prev => prev.filter(p => p._id !== id)),
@@ -82,9 +82,9 @@ export function usePosts(queryParams = {}, initialPosts = []) {
         })
 
         if (!res.ok) throw new Error('Failed to like post')
-        
+
         const data = await res.json()
-        
+
         setPosts(prev => prev.map(p => {
           if (p._id === postId) {
             return {
@@ -95,7 +95,7 @@ export function usePosts(queryParams = {}, initialPosts = []) {
           }
           return p
         }))
-        
+
         return data
       } catch (err) {
         console.error('Like error:', err)
