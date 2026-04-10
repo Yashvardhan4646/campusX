@@ -2,6 +2,7 @@
  
 import { useState, useEffect, useRef, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ArrowLeft, Info, Loader2, ChevronUp } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -293,11 +294,16 @@ export default function ChatRoomPage({ params: paramsPromise }) {
             <ArrowLeft className="w-5 h-5" /> 
           </Button> 
  
-          {/* Group avatar */} 
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 
-                          border border-border flex items-center justify-center font-bold flex-shrink-0 overflow-hidden"> 
+                          border border-border flex items-center justify-center font-bold flex-shrink-0 overflow-hidden relative"> 
             {group?.avatar 
-              ? <img src={group.avatar} alt={group.name} className="w-full h-full object-cover" /> 
+              ? <Image 
+                  src={group.avatar} 
+                  alt={group.name} 
+                  fill 
+                  className="object-cover"
+                  sizes="36px"
+                /> 
               : group?.name?.charAt(0)?.toUpperCase() 
             } 
           </div> 

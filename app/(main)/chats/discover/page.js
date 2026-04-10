@@ -2,6 +2,7 @@
  
 import { useState, useEffect } from 'react' 
 import { useRouter } from 'next/navigation' 
+import Image from 'next/image'
 import {  
   Search,  
   MessageSquare,  
@@ -118,9 +119,15 @@ export default function DiscoverGroupsPage() {
               <div key={group._id} className="bg-card border border-border/50 rounded-2xl p-4 flex flex-col gap-4 hover:border-primary/30 transition-all group"> 
                 <div className="flex items-start gap-3"> 
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20  
-                                  border border-border flex items-center justify-center font-bold text-xl overflow-hidden shadow-sm"> 
+                                  border border-border flex items-center justify-center font-bold text-xl overflow-hidden shadow-sm relative"> 
                     {group.avatar  
-                      ? <img src={group.avatar} alt={group.name} className="w-full h-full object-cover" />  
+                      ? <Image 
+                          src={group.avatar} 
+                          alt={group.name} 
+                          fill 
+                          className="object-cover"
+                          sizes="56px"
+                        />  
                       : group.name.charAt(0).toUpperCase()  
                     } 
                   </div> 
