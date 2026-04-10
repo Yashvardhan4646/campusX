@@ -11,7 +11,7 @@ import { awardCoins } from '@/lib/coins';
 import { deleteCachePattern } from '@/lib/cache';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { sanitizeText } from '@/lib/sanitize';
-
+import Community from '@/models/Community';
 import { broadcastEvent } from '@/lib/notificationStream';
 
 export async function POST(request) {
@@ -40,7 +40,29 @@ export async function POST(request) {
     const { content, community, isAnonymous, poll, linkPreview, images, isMarkdown } = body;
 
     await connectDB();
-
+    // Auto-create community agar exist nahi karti
+    if (community && community.trim()) {
+      const slug = community.trim().toLowerCase().replace(/\s+/g, '-')
+      const existing = await Community.findOne({ slug })
+      if (!existing) {
+        await Community.create({
+          name: community.trim(),
+          slug,
+          createdBy: currentUser._id,
+          members: [currentUser._id],
+          postCount: 1
+        })
+      } else {
+        // Member add karo aur post count badao
+        await Community.findOneAndUpdate(
+          { slug },
+          {
+            $addToSet: { members: currentUser._id },
+            $inc: { postCount: 1 }
+          }
+        )
+      }
+    }
     if (!content || !content.trim()) {
       return NextResponse.json({ message: 'Content is required' }, { status: 400 });
     }
@@ -58,7 +80,7 @@ export async function POST(request) {
       const trimmedOptions = poll
         .map(opt => typeof opt === 'string' ? sanitizeText(opt) : '')
         .filter(opt => opt.length > 0);
-      
+
       const uniqueOptions = [...new Set(trimmedOptions)];
 
       if (uniqueOptions.length < 2 || uniqueOptions.length > 4) {
@@ -125,28 +147,28 @@ export async function POST(request) {
     const xpResult = await awardXP(currentUser._id, 'post');
 
     // Award Coins for posting
-    awardCoins(currentUser._id, 'post_created', post._id).catch(() => {});
+    awardCoins(currentUser._id, 'post_created', post._id).catch(() => { });
 
     // Check first post of day
-    const dayStart = new Date(); 
+    const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
     const postsToday = await Model.countDocuments({
       author: currentUser._id,
       createdAt: { $gte: dayStart }
     });
     if (postsToday === 1) {
-      awardCoins(currentUser._id, 'first_post_of_day', post._id).catch(() => {});
+      awardCoins(currentUser._id, 'first_post_of_day', post._id).catch(() => { });
     }
 
     // Award Coins for poll creation
     if (post.poll) {
-      awardCoins(currentUser._id, 'poll_created', post._id).catch(() => {});
+      awardCoins(currentUser._id, 'poll_created', post._id).catch(() => { });
     }
 
     // Broadcast new post event
-    broadcastEvent({ 
-      type: 'new_post', 
-      postId: post._id, 
+    broadcastEvent({
+      type: 'new_post',
+      postId: post._id,
       community: post.community,
       author: post.isAnonymous ? 'Anonymous' : post.author.name
     });

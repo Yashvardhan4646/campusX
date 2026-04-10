@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
-import Post from '@/models/Post';
-import User from '@/models/User';
-import { slugifyCollege } from '@/utils/formatters';
 import { withCache } from '@/lib/cache';
+import Community from '@/models/Community';
 import { sanitizeMongoInput } from '@/lib/sanitize';
 
 export async function GET(request) {
@@ -14,72 +12,39 @@ export async function GET(request) {
 
     await connectDB();
 
-    // If requesting stats for a specific community
+    // Specific community stats
     if (specificName) {
-      const escapedName = specificName.toString().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const query = { community: { $regex: new RegExp(`^${escapedName}$`, 'i') } };
-      const cacheKey = `community_stats_${escapedName.toLowerCase()}`;
-      
-      const stats = await withCache(cacheKey, 600, async () => {
-        const [postCount, memberCount] = await Promise.all([
-          Post.countDocuments(query),
-          User.countDocuments({ college: { $regex: new RegExp(`^${escapedName}$`, 'i') } })
-        ]);
-        return { name: specificName, postCount, memberCount };
-      });
-      
-      return NextResponse.json(stats);
+      const community = await Community.findOne({
+        name: { $regex: new RegExp(`^${specificName}$`, 'i') }
+      })
+      if (!community) {
+        return NextResponse.json({ name: specificName, postCount: 0, memberCount: 0 })
+      }
+      return NextResponse.json({
+        name: community.name,
+        slug: community.slug,
+        postCount: community.postCount,
+        memberCount: community.members.length
+      })
     }
 
-    // Otherwise return list of active communities
-    const communitiesWithMembers = await withCache('communities_list', 600, async () => {
-      const activeCommunities = await Post.aggregate([
-        { $match: { community: { $ne: '' } } },
-        { 
-          $group: { 
-            _id: { $toLower: '$community' }, 
-            originalName: { $first: '$community' },
-            postCount: { $sum: 1 }, 
-            lastPost: { $max: '$createdAt' } 
-          } 
-        },
-        { $sort: { postCount: -1 } },
-        { $limit: limit }
-      ]);
+    // All communities
+    const communities = await withCache('communities_list', 60, async () => {
+      const list = await Community.find()
+        .sort({ postCount: -1 })
+        .limit(limit)
+        .lean()
 
-      const communitiesMap = new Map();
+      return list.map(c => ({
+        name: c.name,
+        slug: c.slug,
+        postCount: c.postCount,
+        memberCount: c.members.length,
+        lastPost: c.updatedAt
+      }))
+    })
 
-      activeCommunities.forEach((comm) => {
-        const slug = slugifyCollege(comm.originalName);
-        if (!communitiesMap.has(slug)) {
-          communitiesMap.set(slug, {
-            name: comm.originalName,
-            slug,
-            postCount: comm.postCount,
-            lastPost: comm.lastPost
-          });
-        } else {
-          const existing = communitiesMap.get(slug);
-          existing.postCount += comm.postCount;
-          if (new Date(comm.lastPost) > new Date(existing.lastPost)) {
-            existing.lastPost = comm.lastPost;
-          }
-        }
-      });
-
-      return await Promise.all(
-        Array.from(communitiesMap.values()).map(async (comm) => {
-          const memberCount = await User.countDocuments({ 
-            college: { $regex: new RegExp(`^${comm.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } 
-          });
-          return { ...comm, memberCount };
-        })
-      );
-    });
-
-    const response = NextResponse.json(communitiesWithMembers);
-    response.headers.set('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
-    return response;
+    return NextResponse.json(communities)
   } catch (error) {
     console.error('Communities API error:', error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
