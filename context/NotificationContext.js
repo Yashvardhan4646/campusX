@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { getPusherClient } from '@/lib/pusher-client'
 import useUser from '@/hooks/useUser'
+import { playNotificationSound, shouldPlaySound } from '@/lib/notificationSound'
 
 const NotificationContext = createContext()
 
@@ -43,6 +44,16 @@ export function NotificationProvider({ children }) {
     channel.bind('new-notification', (data) => {
       setUnreadCount(prev => Math.min(prev + 1, 99))
       setNewNotification(data)
+      
+      // Play notification sound if:
+      // 1. Tab is hidden OR not on notifications page
+      // 2. Sound is enabled in settings (default: enabled)
+      const isOnNotificationsPage = typeof window !== 'undefined' && window.location.pathname === '/notifications'
+      const isTabHidden = typeof document !== 'undefined' && document.hidden
+      
+      if ((isTabHidden || !isOnNotificationsPage) && shouldPlaySound()) {
+        playNotificationSound()
+      }
       
       // Clear new notification state after a delay to allow UI to react
       setTimeout(() => setNewNotification(null), 5000)

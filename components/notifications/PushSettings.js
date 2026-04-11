@@ -1,18 +1,20 @@
 "use client" 
  
 import { useState, useEffect } from 'react' 
-import { Bell, BellOff, X, CheckCircle, Smartphone, Laptop, Loader2 } from 'lucide-react' 
+import { Bell, BellOff, X, CheckCircle, Smartphone, Laptop, Loader2, Volume2 } from 'lucide-react' 
 import { Button } from '@/components/ui/button' 
 import { Switch } from '@/components/ui/switch' 
 import { usePushNotifications } from '@/hooks/usePushNotifications' 
 import { formatRelativeTime } from '@/utils/formatters' 
-import { toast } from 'sonner' 
+import { toast } from 'sonner'
+import { setNotificationSound, shouldPlaySound } from '@/lib/notificationSound' 
  
 export default function PushSettings() { 
   const [devices, setDevices] = useState([]) 
   const [loadingDevices, setLoadingDevices] = useState(false) 
   const [testLoading, setTestLoading] = useState(false) 
   const [testSent, setTestSent] = useState(false) 
+  const [soundEnabled, setSoundEnabled] = useState(() => shouldPlaySound()) 
  
   const { 
     isSupported, 
@@ -95,6 +97,24 @@ export default function PushSettings() {
         <p className="text-xs text-muted-foreground"> 
           Receive notifications even when CampusX is closed 
         </p> 
+      </div>
+
+      {/* Notification Sound Toggle */}
+      <div className="flex items-center justify-between p-3 bg-accent/30 rounded-lg border border-border">
+        <div className="flex items-center gap-3">
+          <Volume2 className="w-4 h-4 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Notification Sound</p>
+            <p className="text-xs text-muted-foreground">Play a sound for new notifications</p>
+          </div>
+        </div>
+        <Switch 
+          checked={soundEnabled} 
+          onCheckedChange={(checked) => {
+            setSoundEnabled(checked)
+            setNotificationSound(checked)
+          }}
+        />
       </div> 
  
       {/* Not supported */} 
