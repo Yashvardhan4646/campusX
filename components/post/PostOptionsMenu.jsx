@@ -10,7 +10,8 @@ import {
   VolumeX, 
   Ban, 
   Flag, 
-  AlertTriangle
+  AlertTriangle,
+  Copy
 } from 'lucide-react'
 import { 
   DropdownMenu, 
@@ -55,6 +56,15 @@ export default function PostOptionsMenu({
       toast.error('Failed to copy link')
     }
   }, [post._id])
+
+  const handleCopyText = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(post.content || '')
+      toast.success('Text copied! 📋')
+    } catch (err) {
+      toast.error('Failed to copy text')
+    }
+  }, [post.content])
 
   const handleMute = useCallback(async () => {
     if (isMuting) return
@@ -181,6 +191,12 @@ export default function PostOptionsMenu({
           </DropdownMenuTrigger>
           
           <DropdownMenuContent align="end" className="w-56">
+            {/* Copy Text - for all users */}
+            <DropdownMenuItem onClick={handleCopyText}>
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Text
+            </DropdownMenuItem>
+
             {/* Owner options */}
             {isOwner && (
               <>
