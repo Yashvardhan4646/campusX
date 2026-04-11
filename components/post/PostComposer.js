@@ -30,6 +30,66 @@ import useUser from "@/hooks/useUser";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUploadThing } from "@/lib/uploadthing";
 
+// Character Progress Ring Component
+function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
+    const radius = 12;
+    const circumference = 2 * Math.PI * radius;
+    const progress = Math.min(length / maxLength, 1);
+    const strokeDashoffset = circumference - (progress * circumference);
+    const remaining = Math.max(maxLength - length, 0);
+    const showNumber = remaining <= 200;
+
+    const getColor = () => {
+        const pct = (length / maxLength) * 100;
+        if (pct >= 100) return "#ef4444"; // red
+        if (pct >= 95) return "#f97316"; // orange
+        if (pct >= 80) return "#facc15"; // yellow
+        return "hsl(var(--primary))"; // primary green
+    };
+
+    return (
+        <div className="relative w-8 h-8 flex items-center justify-center">
+            <svg
+                className="transform -rotate-90 w-8 h-8"
+                viewBox="0 0 32 32"
+            >
+                {/* Background ring */}
+                <circle
+                    cx="16"
+                    cy="16"
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    className="text-muted-foreground/20"
+                />
+                {/* Progress ring */}
+                <circle
+                    cx="16"
+                    cy="16"
+                    r={radius}
+                    fill="none"
+                    stroke={getColor()}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-300 ease-out"
+                />
+            </svg>
+            {/* Number in center */}
+            <span
+                className={`absolute text-[10px] font-bold tabular-nums ${
+                    length > maxLength ? "text-red-500" : 
+                    remaining <= 200 ? "text-foreground" : "text-muted-foreground"
+                }`}
+            >
+                {showNumber ? remaining : ""}
+            </span>
+        </div>
+    );
+}
+
 export default function PostComposer({
     onPostCreated,
     defaultCommunity,
@@ -551,11 +611,7 @@ export default function PostComposer({
                         </div>
 
                         <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-border/50">
-                            <span
-                                className={`text-[10px] sm:text-xs tabular-nums font-medium ${getCounterColor(content.length)}`}
-                            >
-                                {content.length}/2000
-                            </span>
+                            <CharacterProgressRing length={content.length} maxLength={2000} />
                             <Button
                                 onClick={handleSubmit}
                                 disabled={

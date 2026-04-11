@@ -13,6 +13,7 @@ import CoinUsername from '@/components/coins/CoinUsername'
 import CoinBadge from '@/components/coins/CoinBadge'
 import FollowButton from "@/components/user/FollowButton"
 import useUser from "@/hooks/useUser"
+import TrendingPosts from '@/components/feed/TrendingPosts'
 
 export default function RightPanel() {
   const { user: currentUser, loading: userLoading } = useUser()
@@ -94,6 +95,13 @@ export default function RightPanel() {
               </Link>
             ))
           )}
+        </CardContent>
+      </Card>
+
+      {/* Trending Posts */}
+      <Card className="bg-card/50 border-border mb-2">
+        <CardContent className="pt-4">
+          <TrendingPosts />
         </CardContent>
       </Card>
 
