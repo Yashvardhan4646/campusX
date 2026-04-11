@@ -3,21 +3,16 @@
 import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Heart, MessageCircle, Trash2, Bookmark, MoreHorizontal, Pin, ExternalLink } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 import dynamic from 'next/dynamic'
 import UserAvatar from "@/components/user/UserAvatar"
 import LikeButton from './LikeButton'
 import PostContent from './PostContent'
+import PostOptionsMenu from './PostOptionsMenu'
+import ShareButton from './ShareButton'
 
 // Lazy load heavy dialogs/modals
 const CommentSection = dynamic(() => import('@/components/post/CommentSection'), { ssr: false })
@@ -29,6 +24,7 @@ import { formatRelativeTime } from "@/utils/formatters"
 import { formatCount } from "@/utils/formatters"
 import { cn } from "@/lib/utils"
 import useUser from "@/hooks/useUser"
+import usePostView from "@/hooks/usePostView"
 import { isFounder } from "@/lib/founder"
 import FounderBadges from "@/components/founder/FounderBadges"
 import FormattedTime from "@/components/shared/FormattedTime"
@@ -48,12 +44,10 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
   const pickerTimerRef = useRef(null)
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0)
   const [showComments, setShowComments] = useState(false)
-  const [isBookmarked, setIsBookmarked] = useState(post._isBookmarked || false);
+  const [isBookmarked, setIsBookmarked] = useState(post._isBookmarked || false)
+  const postRef = useRef(null)
 
-  const formatCount = useCallback((count) => {
-    if (count >= 1000) return (count / 1000).toFixed(1) + 'k'
-    return count
-  }, [])
+  usePostView(post._id, postRef)
 
   // useEffect for bookmark checking removed (handled by API)
 
@@ -148,62 +142,12 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
     }
   }, [isBookmarked, onBookmark, post._id])
 
-  const handleDelete = useCallback(async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (!window.confirm('Are you sure you want to delete this post?')) return
-
-    try {
-      const res = await fetch('/api/posts/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: post._id }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message)
-      }
-
-      if (onDelete) onDelete(post._id)
-      toast.success("Post deleted")
-    } catch (error) {
-      toast.error("Couldn't delete post", {
-        variant: "destructive",
-      })
-    }
-  }, [onDelete, post._id])
-
-  const handlePin = useCallback(async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    try {
-      const res = await fetch('/api/founder/pin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: isPinned ? null : post._id }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message)
-      }
-
-      toast.success(isPinned ? "Post unpinned" : "Post pinned to profile")
-      // Force refresh current profile view if needed
-      window.location.reload()
-    } catch (error) {
-      toast.error("Failed to pin post")
-    }
-  }, [isPinned, post._id])
-
   const isPostFounder = !post.isAnonymous && post.author && typeof post.author === 'object' && isFounder(post.author.username)
   const authorEquipped = post.author?.equipped || null
 
   return (
     <div 
+      ref={postRef}
       className="border-b border-border p-4 hover:bg-accent/10 transition-colors cursor-pointer group"
       onClick={() => router.push(`/post/${post._id}`)}
     >
@@ -232,7 +176,7 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
                   <CoinBadge equipped={authorEquipped} />
                 </Link>
                 {isPostFounder && (
-                  <span className="flex-shrink-0">
+                  <span className="shrink-0">
                     <FounderBadges size="sm" />
                   </span>
                 )}
@@ -252,6 +196,10 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
                 🎓 {post.community}
               </Badge>
             )}
+            <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground/80">
+              <Eye className="w-3.5 h-3.5" />
+              <span>{formatCount(post.viewCount || 0)}</span>
+            </span>
           </div>
           
           <div className="mt-1">
@@ -367,32 +315,18 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
                 <Bookmark className={cn("w-4 h-4", isBookmarked && "fill-current")} />
               </button>
 
-              {currentUserId === post.author?._id?.toString() && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-2 rounded-full hover:bg-accent transition-colors">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {isPostFounder && (
-                        <>
-                          <DropdownMenuItem onClick={handlePin}>
-                            <Pin className="w-4 h-4 mr-2" />
-                            {isPinned ? 'Unpin from profile' : 'Pin to profile'}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                        </>
-                      )}
-                      <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete post
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+              <ShareButton post={post} />
+
+              <div onClick={(e) => e.stopPropagation()}>
+                <PostOptionsMenu 
+                  post={post} 
+                  currentUser={currentUser} 
+                  onPostDeleted={onDelete}
+                  onPostUpdated={(updatedPost) => {
+                    post.content = updatedPost.content
+                  }}
+                />
+              </div>
             </div>
           </div>
           
