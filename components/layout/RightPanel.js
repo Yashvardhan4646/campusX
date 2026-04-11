@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "lucide-react"
+import { TrendingUp } from 'lucide-react';
 import AvatarWithFrame from '@/components/coins/AvatarWithFrame'
 import CoinUsername from '@/components/coins/CoinUsername'
 import CoinBadge from '@/components/coins/CoinBadge'
@@ -61,7 +62,7 @@ export default function RightPanel() {
       {/* Trending */}
       <Card className="bg-top border-border mb-2">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-bold">Trending on CampusX</CardTitle>
+          <CardTitle className="text-lg font-bold">Trending Communities</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {loading ? (
@@ -75,9 +76,21 @@ export default function RightPanel() {
             <p className="text-xs text-muted-foreground text-center py-2">No trending communities yet.</p>
           ) : (
             trending.slice(0, 5).map((item) => (
-              <Link key={item.slug} href={`/community/${item.slug}`} className="group block">
-                <p className="text-sm font-semibold group-hover:underline">🎓 {item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.postCount} posts · {item.memberCount} members</p>
+              <Link
+                key={item.slug}
+                href={`/community/${item.slug}`}
+                className="group block"
+              >
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                  <p className="text-sm font-semibold group-hover:underline">
+                    {item.name}
+                  </p>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  {item.postCount} posts · {item.memberCount} members
+                </p>
               </Link>
             ))
           )}
@@ -89,7 +102,7 @@ export default function RightPanel() {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-bold">Trending Hashtags</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-2">
           {loading ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="space-y-1">
@@ -101,7 +114,7 @@ export default function RightPanel() {
             <p className="text-xs text-muted-foreground text-center py-2">No trending hashtags yet.</p>
           ) : (
             trendingHashtags.map((ht) => (
-              <Link key={ht.tag} href={`/hashtag/${ht.tag}`} className="group block">
+              <Link key={ht.tag} href={`/hashtag/${ht.tag}`} className="group block hover:bg-accent p-2 rounded-lg transition-all duration-200">
                 <p className="text-sm font-semibold group-hover:underline text-primary">#{ht.tag}</p>
                 <p className="text-xs text-muted-foreground">{formatCount(ht.postCount)} posts</p>
               </Link>
@@ -194,8 +207,9 @@ export default function RightPanel() {
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           <Link href="/terms" className="hover:underline cursor-pointer">Terms of Service</Link>
           <Link href="/privacy" className="hover:underline cursor-pointer">Privacy Policy</Link>
-          <Link href="/cookie" className="hover:underline cursor-pointer">Cookie Policy</Link>
-          <Link href="/accessibility" className="hover:underline cursor-pointer">Accessibility</Link>
+          <Link href="https://instagram.com/user.__.ayush" target='blank_' className="hover:underline cursor-pointer">Developer</Link>
+          {/* <Link href="/cookie" className="hover:underline cursor-pointer">Cookie Policy</Link>
+          <Link href="/accessibility" className="hover:underline cursor-pointer">Accessibility</Link> */}
         </div>
         <p>© 2026 CampusX · Built for students</p>
       </footer>

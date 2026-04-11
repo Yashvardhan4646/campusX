@@ -3,19 +3,19 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from 'react';
-import { 
-  Home, 
-  User, 
-  GraduationCap, 
-  Bell, 
-  LogOut, 
-  Bookmark, 
-  Search, 
-  Calendar, 
-  Trophy, 
-  MessageSquare, 
+import {
+  Home,
+  User,
+  GraduationCap,
+  Bell,
+  LogOut,
+  Bookmark,
+  Search,
+  Calendar,
+  Trophy,
+  MessageSquare,
   BarChart2,
-  Settings, 
+  Settings,
   Shield,
   BookOpen,
   History,
@@ -57,12 +57,12 @@ export default function Sidebar() {
           setCoinBalance(data.balance)
           setMyEquipped(data.equipped)
         });
-      
+
       if (isAdmin(user)) {
         fetch('/api/admin/resources?status=pending')
           .then(res => res.json())
           .then(data => setPendingResources(data.total || 0))
-          .catch(() => {});
+          .catch(() => { });
       }
     }
   }, [user]);
@@ -112,7 +112,7 @@ export default function Sidebar() {
                   variant="ghost"
                   className={cn(
                     "w-full justify-start gap-4 h-12 px-3 relative transition-all duration-200",
-                    isActive ? "bg-accent text-accent-foreground font-bold" : "text-muted-foreground",
+                    isActive ? "bg-accent text-accent-foreground font-bold hover:cursor-pointer" : "text-muted-foreground hover:cursor-pointer",
                     item.className
                   )}
                 >
@@ -138,8 +138,8 @@ export default function Sidebar() {
                     <Link key={sub.href} href={sub.href}>
                       <button className={cn(
                         "flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all uppercase tracking-wider",
-                        pathname === sub.href 
-                          ? "bg-primary/10 text-primary" 
+                        pathname === sub.href
+                          ? "bg-primary/10 text-primary"
                           : "text-muted-foreground/60 hover:text-foreground hover:bg-accent/50"
                       )}>
                         <sub.icon className="w-3 h-3" />
@@ -259,7 +259,7 @@ export default function Sidebar() {
             )}
           </div>
         )}
-        
+
         <div className="flex items-center gap-1.5">
           <div className="shrink-0">
             <NotificationBell currentUser={user} />

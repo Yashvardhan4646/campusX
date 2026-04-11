@@ -16,7 +16,7 @@ export default function FollowButton({ targetUserId, username, initialIsFollowin
       e.stopPropagation()
     }
     setIsLoading(true)
-    
+
     // Optimistic update
     const wasFollowing = isFollowing
     setIsFollowing(!wasFollowing)
@@ -60,13 +60,13 @@ export default function FollowButton({ targetUserId, username, initialIsFollowin
 
   if (isFollowing) {
     return (
-      <Button 
-        variant="outline" 
-        size="sm" 
+      <Button
+        variant="outline"
+        size="sm"
         disabled={isLoading}
         onClick={handleFollow}
         className={cn(
-          "rounded-full hover:bg-destructive hover:text-white hover:border-destructive group",
+          "rounded-full hover:bg-destructive hover:text-white hover:border-destructive group  hover:cursor-pointer",
           compact ? "px-3 h-8 text-xs" : "px-6"
         )}
       >
@@ -77,13 +77,13 @@ export default function FollowButton({ targetUserId, username, initialIsFollowin
   }
 
   return (
-    <Button 
-      variant="default" 
-      size="sm" 
+    <Button
+      variant="default"
+      size="sm"
       disabled={isLoading}
       onClick={handleFollow}
       className={cn(
-        "rounded-full",
+        "rounded-full hover:cursor-pointer hover:outline-4 hover:outline-accent",
         compact ? "px-4 h-8 text-xs font-bold" : "px-6"
       )}
     >

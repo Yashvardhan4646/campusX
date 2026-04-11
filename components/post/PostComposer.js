@@ -446,7 +446,7 @@ export default function PostComposer({
                                             title="Tag a college or community"
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3"
+                                            className=" hover:cursor-pointer h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3"
                                             onClick={() =>
                                                 setShowTagInput(true)
                                             }
@@ -462,7 +462,7 @@ export default function PostComposer({
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
+                                        " hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
                                         showPoll
                                             ? "text-primary bg-primary/10"
                                             : "text-muted-foreground hover:text-primary",
@@ -488,7 +488,7 @@ export default function PostComposer({
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
+                                        "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
                                         selectedImages.length > 0
                                             ? "text-primary bg-primary/10"
                                             : "text-muted-foreground hover:text-primary",
@@ -518,11 +518,12 @@ export default function PostComposer({
                                     onChange={handleMarkdownFileSelect}
                                 />
                                 <Button
+                                    title="Upload Markdown File"
                                     type="button"
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
+                                        " hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
                                         "text-muted-foreground hover:text-primary",
                                     )}
                                     onClick={() =>
@@ -530,8 +531,6 @@ export default function PostComposer({
                                     }
                                 >
                                     <FileCode className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                    <span className="text-[10px] sm:text-xs">
-                                    </span>
                                 </Button>
                             </div>
 
