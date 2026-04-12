@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 export function useFeedUpdates() {
   const [newPostsAvailable, setNewPostsAvailable] = useState(0)
   const eventSourceRef = useRef(null)
+  const reconnectTimeoutRef = useRef(null)
 
   useEffect(() => {
     const connectSSE = () => {
@@ -20,10 +21,10 @@ export function useFeedUpdates() {
       es.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          
+
           if (data.isBroadcast && data.type === 'new_post') {
             setNewPostsAvailable(prev => prev + 1)
-            
+
             // Optional: toast for new posts
             toast.info(`New post by ${data.author}`, {
               description: data.community ? `in ${data.community}` : 'on the feed',
@@ -38,13 +39,16 @@ export function useFeedUpdates() {
       es.onerror = () => {
         es.close()
         // Reconnect after 5 seconds
-        setTimeout(connectSSE, 5000)
+        reconnectTimeoutRef.current = setTimeout(connectSSE, 5000)
       }
     }
 
     connectSSE()
 
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
       }
