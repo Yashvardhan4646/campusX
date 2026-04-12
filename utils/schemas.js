@@ -44,10 +44,10 @@ export const postCreateSchema = z.object({
   linkPreview: z.object({
     title: z.string().max(200).optional(),
     description: z.string().max(500).optional(),
-    image: z.string().url().optional(),
-    url: z.string().url().optional()
+    image: z.string().optional(),
+    url: z.string().optional()
   }).optional(),
-  images: z.array(z.string().url()).max(6).optional().default([])
+  images: z.array(z.string()).max(6).optional().default([])
 })
 
 export const reactionSchema = z.object({
