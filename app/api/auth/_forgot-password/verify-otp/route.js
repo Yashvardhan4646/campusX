@@ -60,12 +60,6 @@ export async function POST(request) {
         resetTokenExpiry 
       }
     )
-    console.log(`[DEBUG] Saved resetToken for ${normalizedEmail}:`, resetToken)
-    
-    // Write to a temporary file we can read
-    try {
-      fs.appendFileSync(path.join(process.cwd(), 'scratch', 'pw-debug.log'), `[${new Date().toISOString()}] SAVED: ${normalizedEmail} -> ${resetToken}\n`)
-    } catch (e) {}
 
     // ── Delete OTP Record ──
     await Otp.deleteOne({ _id: otpRecord._id })

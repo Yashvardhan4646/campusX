@@ -35,33 +35,12 @@ export async function POST(request) {
     await connectDB()
 
     // ── Find user by token and check expiry ──
-    console.log('[DEBUG] Searching for user with resetToken:', resetToken)
     const user = await User.findOne({
       resetToken,
       resetTokenExpiry: { $gt: new Date() }
     })
-    
-    if (!user) {
-      const userExistsWithToken = await User.findOne({ resetToken })
-      if (userExistsWithToken) {
-        console.log('[DEBUG] User found with token but it is EXPIRED. Expiry:', userExistsWithToken.resetTokenExpiry)
-      } else {
-        console.log('[DEBUG] No user found with this resetToken at all.')
-      }
-    }
 
     if (!user) {
-      const userExistsWithToken = await User.findOne({ resetToken })
-      let debugMsg = `[${new Date().toISOString()}] RESET ATTEMPT: ${resetToken}\n`
-      if (userExistsWithToken) {
-        debugMsg += `FOUND USER: ${userExistsWithToken.email} but EXPIRED at ${userExistsWithToken.resetTokenExpiry}\n`
-      } else {
-        debugMsg += `USER NOT FOUND for token\n`
-      }
-      try {
-        fs.appendFileSync(path.join(process.cwd(), 'scratch', 'pw-debug.log'), debugMsg)
-      } catch (e) {}
-      
       return errorResponse(new BadRequestError('Invalid or expired reset token'))
     }
 
