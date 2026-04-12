@@ -93,7 +93,7 @@ export async function POST(request) {
 
       // Award coins for like received
       if (post.author && post.author.toString() !== currentUserIdStr) {
-        awardCoins(post.author, 'like_received', postId).catch(() => {});
+        awardCoins(post.author, 'like_received', postId).catch(err => console.error('Operation failed:', err));
       }
     }
 

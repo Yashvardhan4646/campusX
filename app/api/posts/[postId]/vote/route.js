@@ -93,7 +93,7 @@ export async function POST(request, { params }) {
         type: 'poll_vote',
         postId: postId,
         meta: { postPreview: post.content?.substring(0, 50) }
-      }).catch(() => {});
+      }).catch(err => console.error('Operation failed:', err));
     }
 
     return NextResponse.json({ 

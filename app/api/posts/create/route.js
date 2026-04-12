@@ -13,6 +13,7 @@ import { applyRateLimit } from '@/lib/rate-limit';
 import { sanitizeText } from '@/lib/sanitize';
 import Community from '@/models/Community';
 import { broadcastEvent } from '@/lib/notificationStream';
+import { postCreateSchema, validateRequest } from '@/utils/schemas';
 
 export async function POST(request) {
   try {
@@ -30,14 +31,15 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
+    const validation = await validateRequest(postCreateSchema)(request);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { message: 'Validation failed', errors: validation.errors },
+        { status: 400 }
+      );
     }
 
-    const { content, community, isAnonymous, poll, linkPreview, images, isMarkdown } = body;
+    const { content, community, isAnonymous, poll, linkPreview, images, isMarkdown } = validation.data;
 
     await connectDB();
     // Auto-create community agar exist nahi karti
@@ -63,15 +65,8 @@ export async function POST(request) {
         )
       }
     }
-    if (!content || !content.trim()) {
-      return NextResponse.json({ message: 'Content is required' }, { status: 400 });
-    }
 
     const sanitizedContent = sanitizeText(content);
-    if (sanitizedContent.length > 2000) {
-      return NextResponse.json({ message: 'Post too long (max 2000 chars)' }, { status: 400 });
-    }
-
     const hashtags = extractHashtags(sanitizedContent);
 
     // Poll validation
@@ -83,14 +78,6 @@ export async function POST(request) {
 
       const uniqueOptions = [...new Set(trimmedOptions)];
 
-      if (uniqueOptions.length < 2 || uniqueOptions.length > 4) {
-        return NextResponse.json({ message: 'Poll must have 2-4 unique options' }, { status: 400 });
-      }
-
-      if (uniqueOptions.some(opt => opt.length > 80)) {
-        return NextResponse.json({ message: 'Poll options must be under 80 characters' }, { status: 400 });
-      }
-
       pollData = {
         options: uniqueOptions.map(text => ({ text, votes: [] })),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
@@ -100,16 +87,6 @@ export async function POST(request) {
 
     const isAnon = isAnonymous === true;
     const Model = isAnon ? AnonymousPost : Post;
-
-    // Validate images array
-    if (images !== undefined) {
-      if (!Array.isArray(images) || images.length > 6) {
-        return NextResponse.json({ message: 'Maximum 6 images allowed' }, { status: 400 });
-      }
-      if (images.some(url => typeof url !== 'string' || !url.trim())) {
-        return NextResponse.json({ message: 'Invalid image URL in images array' }, { status: 400 });
-      }
-    }
 
     const postData = {
       content: sanitizedContent,

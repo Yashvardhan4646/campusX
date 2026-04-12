@@ -11,6 +11,7 @@ import { applyRateLimit } from '@/lib/rate-limit';
 import { sanitizeText } from '@/lib/sanitize';
 import { awardCoins } from '@/lib/coins';
 import { attachEquippedToItems } from '@/lib/equipped-helpers';
+import { commentSchema, validateRequest } from '@/utils/schemas';
 
 // GET /api/posts/[postId]/comments
 export async function GET(request, { params }) {
@@ -59,22 +60,17 @@ export async function POST(request, { params }) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
+    const validation = await validateRequest(commentSchema)(request);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { message: 'Validation failed', errors: validation.errors },
+        { status: 400 }
+      );
     }
 
-    const { content } = body;
-    if (!content || !content.trim()) {
-      return NextResponse.json({ message: 'Comment content is required' }, { status: 400 });
-    }
+    const { content } = validation.data;
 
     const sanitizedContent = sanitizeText(content);
-    if (sanitizedContent.length > 280) {
-      return NextResponse.json({ message: 'Comment too long' }, { status: 400 });
-    }
 
     await connectDB();
 
@@ -104,11 +100,11 @@ export async function POST(request, { params }) {
     await PostModel.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
     // Award coins for comment created
-    awardCoins(currentUser._id, 'comment_created', postId).catch(() => {});
+    awardCoins(currentUser._id, 'comment_created', postId).catch(err => console.error('Operation failed:', err));
 
     // Award coins for comment received (if not own post)
     if (post.author && post.author.toString() !== currentUser._id.toString()) {
-      awardCoins(post.author, 'comment_received', postId).catch(() => {});
+      awardCoins(post.author, 'comment_received', postId).catch(err => console.error('Operation failed:', err));
     }
 
     // Notification - ONLY if not anonymous
@@ -123,7 +119,7 @@ export async function POST(request, { params }) {
           postPreview: post.content?.substring(0, 50),
           commentPreview: sanitizedContent.substring(0, 50)
         }
-      }).catch(() => {});
+      }).catch(err => console.error('Operation failed:', err));
     }
 
     return NextResponse.json(commentWithEquipped, { status: 201 });
