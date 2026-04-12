@@ -36,18 +36,18 @@ export const followSchema = z.object({
 export const postCreateSchema = z.object({
   content: z.string()
     .min(1, 'Content is required')
-    .max(2000, 'Post cannot exceed 2000 characters')
-    .trim(),
-  community: z.string().max(50).optional().default(''),
+    .max(2000, 'Post cannot exceed 2000 characters'),
+  community: z.string().optional().default(''),
   isAnonymous: z.boolean().optional().default(false),
-  poll: z.array(z.string().max(80)).min(2).max(4).optional(),
+  poll: z.array(z.string()).optional(),
   linkPreview: z.object({
-    title: z.string().max(200).optional(),
-    description: z.string().max(500).optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
     image: z.string().optional(),
     url: z.string().optional()
   }).optional(),
-  images: z.array(z.string()).max(6).optional().default([])
+  images: z.array(z.string()).optional().default([]),
+  isMarkdown: z.boolean().optional().default(false)
 })
 
 export const reactionSchema = z.object({

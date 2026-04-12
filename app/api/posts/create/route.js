@@ -13,7 +13,6 @@ import { applyRateLimit } from '@/lib/rate-limit';
 import { sanitizeText } from '@/lib/sanitize';
 import Community from '@/models/Community';
 import { broadcastEvent } from '@/lib/notificationStream';
-import { postCreateSchema, validateRequest } from '@/utils/schemas';
 
 export async function POST(request) {
   try {
@@ -31,15 +30,14 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const validation = await validateRequest(postCreateSchema)(request);
-    if (!validation.valid) {
-      return NextResponse.json(
-        { message: 'Validation failed', errors: validation.errors },
-        { status: 400 }
-      );
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
     }
 
-    const { content, community, isAnonymous, poll, linkPreview, images, isMarkdown } = validation.data;
+    const { content, community, isAnonymous, poll, linkPreview, images, isMarkdown } = body;
 
     await connectDB();
     // Auto-create community agar exist nahi karti
