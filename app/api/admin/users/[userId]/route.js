@@ -4,10 +4,8 @@ import User from '@/models/User'
 import UserBan from '@/models/UserBan'
 import Post from '@/models/Post'
 import LoginAttempt from '@/models/LoginAttempt'
-import Wallet from '@/models/Wallet'
 import { getCurrentUser, blacklistAllUserTokens } from '@/lib/auth'
 import { isAdmin, isFounder } from '@/lib/admin'
-import { awardCoins } from '@/lib/coins'
 import { createNotification } from '@/lib/notifications'
 import { logAdminAction } from '@/lib/admin-log'
 import mongoose from 'mongoose'
@@ -34,13 +32,10 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    const wallet = await Wallet.findOne({ userId }).lean()
-
     return NextResponse.json({
       user,
       banHistory,
       postCount,
-      coinBalance: wallet?.balance || 0,
       loginAttempts
     })
   } catch (error) {
@@ -140,7 +135,6 @@ export async function POST(request, { params }) {
 
       case 'verify': {
         await User.findByIdAndUpdate(userId, { isVerified: true, verifiedAt: new Date() })
-        await awardCoins(userId, 50, 'Account verification bonus', currentUser)
 
         await createNotification({
           recipient: userId,
@@ -228,33 +222,6 @@ export async function POST(request, { params }) {
           targetType: 'user',
           targetId: userId,
           summary: `Forced logout for user ${targetUser.username}`
-        })
-
-        return NextResponse.json({ success: true })
-      }
-
-      case 'award_coins': {
-        const coinAmount = parseInt(amount)
-        if (isNaN(coinAmount) || coinAmount < 1 || coinAmount > 10000) {
-          return NextResponse.json({ error: 'Invalid amount (1-10000)' }, { status: 400 })
-        }
-
-        await awardCoins(userId, coinAmount, reason || 'Admin award', currentUser)
-
-        await createNotification({
-          recipient: userId,
-          type: 'system',
-          meta: { message: `Admin awarded you ${coinAmount} Campus Coins!` }
-        })
-
-        await logAdminAction({
-          adminId: currentUser._id,
-          action: 'user_award_coins',
-          targetType: 'user',
-          targetId: userId,
-          summary: `Awarded ${coinAmount} coins to ${targetUser.username}`,
-          reason,
-          meta: { amount: coinAmount }
         })
 
         return NextResponse.json({ success: true })
