@@ -37,12 +37,12 @@ Every Indian college student lives across 5 different platforms — WhatsApp for
 │                                                             │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
 │  │  Verify  │  │   Feed   │  │ Community│  │ Profile  │   │
-│  │  Email   │→ │  Posts   │  │  Rooms   │  │ + Coins  │   │
-│  │  + OTP   │  │  + Likes │  │  + Chat  │  │ + Badge  │   │
+│  │  Email   │→ │  Posts   │  │  Rooms   │  │ + Badge  │   │
+│  │  + OTP   │  │  + Likes │  │  + Chat  │  │          │   │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
 │       ↓              ↓              ↓              ↓        │
-│  ✅ Verified    📰 Smart       💬 Realtime    🏆 Gamified   │
-│  Identity      Algorithm      Messaging      Experience    │
+│  ✅ Verified    📰 Smart       💬 Realtime    🏆 Verified   │
+│  Identity      Algorithm      Messaging      Badges       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -78,17 +78,6 @@ Students see relevant content from their college first, trending content second.
 
 ---
 
-### 🏆 Campus Coins (Virtual Currency)
-```
-Post content        → Earn coins
-Get likes           → Earn coins  
-Daily login         → Earn coins
-Redeem coins        → Unlock features
-```
-Gamified engagement that rewards quality contribution.
-
----
-
 ### 🛡️ Admin Moderation Panel
 Full admin dashboard to manage content, users, and reports — keeping the campus feed clean and safe.
 
@@ -109,7 +98,6 @@ Full admin dashboard to manage content, users, and reports — keeping the campu
 | Notification sound toggle | ✅ Live |
 | Trending posts sidebar | ✅ Live |
 | Community rooms | ✅ Live |
-| Campus Coins system | ✅ Live |
 | User profiles + account settings | ✅ Live |
 | 3-dot post menu (edit/delete/report) | ✅ Live |
 | Admin moderation panel | ✅ Live |
@@ -147,9 +135,9 @@ Full admin dashboard to manage content, users, and reports — keeping the campu
 │  │  App Router │         │    API Routes         │  │
 │  │  (Frontend) │ ←────→  │  /api/posts           │  │
 │  │             │         │  /api/auth             │  │
-│  │  - Feed     │         │  /api/notifications    │  │
-│  │  - Profile  │         │  /api/communities      │  │
-│  │  - Explore  │         │  /api/coins            │  │
+│  │  - Feed     │         │  /api/notifications    │
+│  │  - Profile  │         │  /api/communities      │
+│  │  - Explore  │         │  /api/users            │
 │  │  - Admin    │         └──────────┬─────────────┘  │
 │  └─────────────┘                    │               │
 └─────────────────────────────────────│───────────────┘
@@ -241,7 +229,7 @@ campusx/
 │       ├── posts/
 │       ├── notifications/
 │       ├── communities/
-│       ├── coins/
+│       ├── users/
 │       └── uploadthing/
 ├── components/
 │   ├── ui/                  # shadcn components
