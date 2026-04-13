@@ -5,7 +5,6 @@ import Post from '@/models/Post'
 import { getCurrentUser } from '@/lib/auth'
 import { isFounder } from '@/lib/founder'
 import { sanitizeUser, sanitizeText } from '@/lib/sanitize'
-import { attachEquippedToItems } from '@/lib/equipped-helpers'
 
 export async function GET(request, { params }) {
   try {
@@ -49,8 +48,7 @@ export async function GET(request, { params }) {
       founderData: userResult.founderData,
     }
 
-    const [profileWithEquipped] = await attachEquippedToItems([responseData], '')
-    return NextResponse.json(profileWithEquipped)
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('[GET /api/users/username]', error)
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })

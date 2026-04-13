@@ -4,7 +4,6 @@ import Post from '@/models/Post'
 import { getCurrentUser } from '@/lib/auth'
 import { sanitizeMongoInput } from '@/lib/sanitize'
 import { validateObjectId } from '@/utils/validators'
-import { attachEquippedToItems } from '@/lib/equipped-helpers'
 import { sanitizeUser } from '@/lib/sanitize'
 
 export async function GET(request, { params }) {
@@ -38,9 +37,7 @@ export async function GET(request, { params }) {
       _isLiked: isLiked
     }
 
-    const [postWithEquipped] = await attachEquippedToItems([postResponse])
-
-    return NextResponse.json(postWithEquipped)
+    return NextResponse.json(postResponse)
   } catch (error) {
     console.error('Post fetch error:', error)
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
