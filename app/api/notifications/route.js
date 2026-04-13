@@ -1,15 +1,14 @@
-import { NextResponse } from 'next/server' 
-import { getCurrentUser } from '@/lib/auth' 
-import connectDB from '@/lib/db' 
-import Notification from '@/models/Notification' 
-import '@/models/User' 
-import '@/models/Post' 
+import { NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth'
+import connectDB from '@/lib/db'
+import Notification from '@/models/Notification'
+import '@/models/User'
+import '@/models/Post'
 import '@/models/Comment'
 import '@/models/GroupChat'
 import '@/models/Event'
 import '@/models/Resource'
-import { getNotificationText, getNotificationIcon, getNotificationURL } from '@/lib/notifications' 
-import { attachEquippedToItems } from '@/lib/equipped-helpers'
+import { getNotificationText, getNotificationIcon, getNotificationURL } from '@/lib/notifications'
  
 export async function GET(request) { 
   try { 
@@ -54,12 +53,9 @@ export async function GET(request) {
       icon: getNotificationIcon(n.type), 
       url: getNotificationURL(n) 
     })) 
-
-    // 4. Attach equipped visuals to senders
-    const withEquipped = await attachEquippedToItems(withComputed, 'sender')
  
     return NextResponse.json({ 
-      notifications: withEquipped, 
+      notifications: withComputed, 
       total, 
       hasMore: total > skip + notifications.length, 
       unreadCount 

@@ -5,7 +5,6 @@ import LoginHistory from '@/models/LoginHistory';
 import { signToken, setAuthCookie } from '@/lib/auth';
 import { applyRateLimit, rateLimit } from '@/lib/rate-limit';
 import { sanitizeUser, sanitizeMongoInput } from '@/lib/sanitize';
-import { awardCoins } from '@/lib/coins';
 import { sendSuspiciousLoginEmail } from '@/lib/email-templates';
 import { loginSchema, validateRequest } from '@/utils/schemas';
 
@@ -126,9 +125,6 @@ export async function POST(request) {
         createdAt: new Date()
       }).catch(err => console.error('Operation failed:', err))
     }
-
-    // Award daily login coins (fire-and-forget)
-    awardCoins(user._id, 'daily_login').catch(err => console.error('Operation failed:', err));
 
     return response;
   } catch (error) {
