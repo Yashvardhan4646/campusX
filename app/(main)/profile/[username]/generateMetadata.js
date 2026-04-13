@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
       ? `${user.bio} · ${user.followers?.length || 0} followers`
       : `${user.college || 'Student'} on CampusX · ${user.followers?.length || 0} followers`
 
-    const ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/api/og/profile?username=${username}`
+    const ogImage = user.avatar || `${process.env.NEXT_PUBLIC_APP_URL}/og-image.png`
     const profileUrl = `${process.env.NEXT_PUBLIC_APP_URL}/profile/${username}`
 
     return {
