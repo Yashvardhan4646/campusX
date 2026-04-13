@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
       }).catch(() => 0)
     ])
 
-    const ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/api/og/community?college=${encodeURIComponent(collegeSlug)}`
+    const ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/og-image.png`
     const communityUrl = `${process.env.NEXT_PUBLIC_APP_URL}/community/${collegeSlug}`
 
     return {
