@@ -7,7 +7,6 @@ import { isValidObjectId } from '@/utils/validators'
 import { sanitizeText } from '@/lib/sanitize'
 import { createNotification } from '@/lib/notifications'
 import { utapi } from '@/lib/ut-api'
-import { awardCoins } from '@/lib/coins'
 
 /**
  * POST /api/admin/resources/review
@@ -86,13 +85,10 @@ export async function POST(request) {
     } else {
       resource.status = 'approved'
       resource.reviewedBy = currentUser._id
-      resource.reviewNote = reviewNote 
-        ? sanitizeText(reviewNote).slice(0, 300) 
+      resource.reviewNote = reviewNote
+        ? sanitizeText(reviewNote).slice(0, 300)
         : ''
       resource.reviewedAt = new Date()
-
-      // Award coins for resource approval
-      awardCoins(resource.uploadedBy, 'resource_approved', resource._id).catch(err => console.error('Operation failed:', err));
     }
 
     await resource.save()

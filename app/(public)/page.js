@@ -6,7 +6,7 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Post from "@/models/Post";
 import Resource from "@/models/Resource";
-import StudyRoom from '@/models/StudyRoom';
+// import StudyRoom from '@/models/StudyRoom';
 import { verifyToken } from "@/lib/auth-edge";
 
 const Stats = dynamic(() => import("@/components/landing/Stats"))
