@@ -4,14 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import FormattedTime from "@/components/shared/FormattedTime"
 import { isFounder } from "@/lib/founder"
 import FounderBadges from "@/components/founder/FounderBadges"
-import CoinUsername from '@/components/coins/CoinUsername'
-import CoinBadge from '@/components/coins/CoinBadge'
 
 const PostMeta = memo(function PostMeta({
   author,
   createdAt,
-  community,
-  equipped
+  community
 }) {
   const isPostFounder = author && typeof author === 'object' && isFounder(author.username)
 
@@ -22,12 +19,7 @@ const PostMeta = memo(function PostMeta({
         className="hover:underline flex items-center gap-1"
         onClick={(e) => e.stopPropagation()}
       >
-        <CoinUsername
-          name={author.name}
-          equipped={equipped}
-          className="font-bold text-foreground"
-        />
-        <CoinBadge equipped={equipped} />
+        <span className="font-bold text-foreground">{author.name}</span>
       </Link>
       {isPostFounder && (
         <span className="flex-shrink-0">
