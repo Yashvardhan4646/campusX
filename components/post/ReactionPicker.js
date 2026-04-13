@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { REACTIONS as REACTION_EMOJIS } from "@/lib/reaction-utils"
+// import { REACTIONS as REACTION_EMOJIS } from "@/lib/reaction-utils"
 
 const REACTION_LIST = Object.entries(REACTION_EMOJIS).map(([type, emoji]) => ({
   type,
