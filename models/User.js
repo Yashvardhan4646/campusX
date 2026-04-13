@@ -153,18 +153,6 @@ const userSchema = new mongoose.Schema({
   mutedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
 
-  // Coin display preference 
-  showCoinsOnProfile: { type: Boolean, default: true }, 
-  
-  // Referral 
-  referralCode: { type: String, unique: true, sparse: true }, 
-  referredBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    default: null 
-  }, 
-  referralCount: { type: Number, default: 0 }, 
-  
   // Streak 
   currentStreak:  { type: Number, default: 0 }, 
   longestStreak:  { type: Number, default: 0 }, 
