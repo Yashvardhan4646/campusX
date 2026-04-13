@@ -8,9 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "lucide-react"
 import { TrendingUp } from 'lucide-react';
-import AvatarWithFrame from '@/components/coins/AvatarWithFrame'
-import CoinUsername from '@/components/coins/CoinUsername'
-import CoinBadge from '@/components/coins/CoinBadge'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import FollowButton from "@/components/user/FollowButton"
 import useUser from "@/hooks/useUser"
 import TrendingPosts from '@/components/feed/TrendingPosts'
@@ -193,9 +191,12 @@ export default function RightPanel() {
             suggestions.slice(0, 5).map((user) => (
               <div key={user._id} className="flex items-center justify-between gap-3">
                 <Link href={`/profile/${user.username}`} className="flex items-center gap-3 min-w-0 flex-1">
-                  <AvatarWithFrame user={user} size="sm" equipped={user.equipped} />
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
                   <div className="min-w-0">
-                    <CoinUsername name={user.name} equipped={user.equipped} className="text-sm font-semibold hover:underline block truncate" />
+                    <p className="text-sm font-semibold hover:underline block truncate">{user.name}</p>
                     <p className="text-[10px] text-muted-foreground truncate">@{user.username}</p>
                   </div>
                 </Link>
