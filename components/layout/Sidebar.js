@@ -33,8 +33,6 @@ import NotificationBell from '@/components/notifications/NotificationBell'
 import { cn } from "@/lib/utils"
 import { isFounder } from "@/lib/founder"
 import { isAdmin } from "@/lib/admin"
-import AvatarWithFrame from '@/components/coins/AvatarWithFrame'
-import CoinUsername from '@/components/coins/CoinUsername'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -42,25 +40,14 @@ export default function Sidebar() {
   const { user, loading } = useUser()
   const { unreadCount } = useNotifications()
   const chatUnread = useChatUnreadCount()
-  const [coinBalance, setCoinBalance] = useState(0);
   const [pendingResources, setPendingResources] = useState(0);
-  const [myEquipped, setMyEquipped] = useState(null)
 
   useEffect(() => {
-    if (user) {
-      fetch('/api/coins/wallet')
+    if (user && isAdmin(user)) {
+      fetch('/api/admin/resources?status=pending')
         .then(res => res.json())
-        .then(data => {
-          setCoinBalance(data.balance)
-          setMyEquipped(data.equipped)
-        });
-
-      if (isAdmin(user)) {
-        fetch('/api/admin/resources?status=pending')
-          .then(res => res.json())
-          .then(data => setPendingResources(data.total || 0))
-          .catch(() => { });
-      }
+        .then(data => setPendingResources(data.total || 0))
+        .catch(() => { });
     }
   }, [user]);
 
@@ -190,34 +177,6 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-3 border-t border-border bg-background/50 backdrop-blur-md space-y-1">
-        {/* Coin & Shop Quick Links */}
-        <div className="flex flex-col gap-1 mb-2">
-          <Link href="/wallet">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-amber-500/10 transition-colors group">
-              <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Coins className="w-4 h-4 text-amber-500" />
-              </div>
-              <div className="hidden lg:block">
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Wallet</p>
-                <p className="text-sm text-amber-500 font-black">{coinBalance}</p>
-              </div>
-            </div>
-          </Link>
-          <Link href="/shop">
-            <div className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors group",
-              pathname === '/shop' ? "bg-primary/10" : "hover:bg-accent"
-            )}>
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ShoppingBag className={cn("w-4 h-4", pathname === '/shop' ? "text-primary" : "text-muted-foreground")} />
-              </div>
-              <span className={cn(
-                "hidden lg:inline text-sm font-bold",
-                pathname === '/shop' ? "text-primary" : "text-muted-foreground"
-              )}>Shop</span>
-            </div>
-          </Link>
-        </div>
 
         {!loading && user && user.username && (
           <div className="mb-3 space-y-3">
@@ -230,27 +189,26 @@ export default function Sidebar() {
               <Progress value={((user.xp || 0) % 1000) / 10} className="h-1" />
             </div>
 
-            {isFounder(user.username) ? (
-              <Link href={`/profile/${user.username}`}>
-                <div className="flex flex-col lg:flex-row items-center gap-3 p-1.5 rounded-xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
-                  <AvatarWithFrame user={user} size="sm" equipped={myEquipped} />
-                  <div className="hidden lg:block flex-1 min-w-0">
-                    <CoinUsername name={user.name} equipped={myEquipped} className="text-xs font-bold text-foreground" />
-                    <p className="text-[10px] text-primary/80 font-bold truncate">Founder</p>
-                  </div>
+            <Link href={`/profile/${user.username}`}>
+              <div className={cn(
+                "flex flex-col lg:flex-row items-center gap-3 p-1.5 rounded-xl transition-colors",
+                isFounder(user.username) ? "bg-primary/5 border border-primary/10 hover:bg-primary/10" : "hover:bg-accent"
+              )}>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="hidden lg:block flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground">{user.name}</p>
+                  <p className={cn(
+                    "text-[10px] truncate font-medium",
+                    isFounder(user.username) ? "text-primary/80" : "text-muted-foreground"
+                  )}>
+                    {isFounder(user.username) ? "Founder" : `@${user.username}`}
+                  </p>
                 </div>
-              </Link>
-            ) : (
-              <Link href={`/profile/${user.username}`}>
-                <div className="flex flex-col lg:flex-row items-center gap-3 p-1.5 rounded-xl hover:bg-accent transition-colors">
-                  <AvatarWithFrame user={user} size="sm" equipped={myEquipped} />
-                  <div className="hidden lg:block flex-1 min-w-0">
-                    <CoinUsername name={user.name} equipped={myEquipped} className="text-xs font-bold text-foreground" />
-                    <p className="text-[10px] text-muted-foreground truncate font-medium">@{user.username}</p>
-                  </div>
-                </div>
-              </Link>
-            )}
+              </div>
+            </Link>
           </div>
         )}
 
