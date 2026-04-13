@@ -20,9 +20,7 @@ import {
   History,
   Heart,
   Coins,
-  ShoppingBag,
-  MonitorPlay,
-  PencilLine
+  ShoppingBag
 } from "lucide-react"
 import { useChatUnreadCount } from '@/hooks/useChatUnreadCount'
 import { Button } from "@/components/ui/button"
@@ -70,10 +68,8 @@ export default function Sidebar() {
     { label: "Feed", href: "/feed", icon: Home },
     { label: "Search", href: "/search", icon: Search },
     { label: "Resources", href: "/resources", icon: BookOpen },
-    { label: "Whiteboard", href: "/whiteboard", icon: PencilLine },
     { label: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
     { label: "Chats", href: "/chats", icon: MessageSquare, badge: chatUnread },
-    { label: "Code Area", href: "/study-rooms", icon: MonitorPlay },
     { label: "Communities", href: "/community", icon: GraduationCap },
     { label: "Events", href: "/events", icon: Calendar },
     { label: "Bookmarks", href: "/bookmarks", icon: Bookmark },

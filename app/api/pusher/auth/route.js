@@ -70,36 +70,6 @@ export async function POST(request) {
       // Auth passes — user can subscribe to their own channel
     }
 
-    // Study Room channels: presence-room-{roomId} and private-room-{roomId}
-    if (channelName.startsWith('presence-room-') || channelName.startsWith('private-room-')) {
-      const roomId = channelName.replace(/^(presence-room-|private-room-)/, '')
-
-      if (!validateObjectId(roomId)) {
-        return NextResponse.json({ error: 'Invalid room ID' }, { status: 400 })
-      }
-
-      await connectDB()
-
-      const StudyRoom = (await import('@/models/StudyRoom')).default
-      const room = await StudyRoom.findById(roomId).lean()
-
-      if (!room) {
-        return NextResponse.json({ error: 'Room not found' }, { status: 404 })
-      }
-
-      const userId = currentUser._id.toString()
-      const isParticipant = room.participants.some(
-        p => p.toString() === userId
-      ) || room.creator.toString() === userId
-
-      if (!isParticipant) {
-        return NextResponse.json(
-          { error: 'Not a participant of this room' },
-          { status: 403 }
-        )
-      }
-    }
-
     // Generate Pusher auth response 
     const pusher = getPusherServer() 
     
