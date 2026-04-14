@@ -78,7 +78,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com",  // Next.js needs unsafe-eval, Monaco, tldraw
               "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob:", 
               "img-src 'self' data: https: http: blob: https://utfs.io https://*.uploadthing.com https://*.ufs.sh https://*.tldraw.com",  // allow all external images
-              "connect-src 'self' https://api.anthropic.com wss://*.pusher.com https://*.pusher.com https://www.googleapis.com https://*.uploadthing.com https://*.ingest.uploadthing.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob: data:", 
+              "connect-src 'self' https://api.anthropic.com wss://*.pusher.com https://*.pusher.com https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://*.uploadthing.com https://*.ingest.uploadthing.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob: data: *", 
               "font-src 'self' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com data:", 
               "frame-src 'self' https://www.youtube.com https://*.tldraw.com", 
               "worker-src 'self' blob: https://*.tldraw.com", 
