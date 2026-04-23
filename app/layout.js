@@ -9,6 +9,9 @@ export const metadata = {
     default: "CampusX",
     template: "%s | CampusX",
   },
+  verification: {
+    google: 'K-xkYw1Y1PqYEcOS3grjVfobh5EH_UFVzU8jESjBzKg'
+  },
   description: "The exclusive social network for Indian college students to connect, share, and grow.",
   keywords: [
     "student social network", 
