@@ -2,7 +2,7 @@ import LegalLayout from "@/components/shared/LegalLayout";
 
 export const metadata = {
   title: "Privacy Policy",
-  description: "Learn about how CampusX collects, uses, and protects your personal data.",
+  description: "Learn about how CampusZen collects, uses, and protects your personal data.",
 };
 
 const sections = [
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
     >
       <section className="space-y-8">
         <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
-          Your privacy is important to us. This Privacy Policy explains what information CampusX collects and how we use it to build your campus community.
+          Your privacy is important to us. This Privacy Policy explains what information CampusZen collects and how we use it to build your campus community.
         </p>
       </section>
 
