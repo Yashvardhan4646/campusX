@@ -4,10 +4,10 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * Reusable Logo component for CampusX.
+ * Reusable Logo component for CampusZen.
  * @param {Object} props
  * @param {string} props.className - Additional classes for the container
- * @param {boolean} props.showText - Whether to show the "CampusX" text
+ * @param {boolean} props.showText - Whether to show the "CampusZen" text
  * @param {string} props.size - Size of the icon ('sm', 'md', 'lg')
  * @param {string} props.href - Destination link (defaults to /feed)
  */
@@ -45,7 +45,7 @@ export default function Logo({
           "font-bold tracking-tight text-foreground",
           textSizes[size] || textSizes.md
         )}>
-          Campus<span className="text-primary">X</span>
+          Campus<span className="text-primary">Zen</span>
         </span>
       )}
     </Link>
