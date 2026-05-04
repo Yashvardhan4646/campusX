@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { gsap, shouldAnimate } from '@/lib/gsap-config'
 import { Users, FileText, BookOpen, Code } from 'lucide-react'
 
-export default function Stats({ users = 0, posts = 0, resources = 0, codeAreas = 0 }) {
+export default function Stats({ users = 50, posts = 120, resources = 20, codeAreas = 3 }) {
   const sectionRef = useRef(null)
   const numberRefs = useRef([])
 
