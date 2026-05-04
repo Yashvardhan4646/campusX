@@ -2,7 +2,7 @@ import LegalLayout from "@/components/shared/LegalLayout";
 
 export const metadata = {
   title: "Terms of Service",
-  description: "Read the Terms of Service for CampusX, the exclusive social media platform for Indian college students.",
+  description: "Read the Terms of Service for CampusZen, the exclusive social media platform for Indian college students.",
 };
 
 const sections = [
@@ -23,7 +23,7 @@ export default function TermsPage() {
     >
       <section className="space-y-8">
         <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
-          Welcome to CampusX. These Terms of Service ("Terms") govern your access to and use of CampusX's website and services. By using CampusX, you agree to be bound by these Terms.
+          Welcome to CampusZen. These Terms of Service ("Terms") govern your access to and use of CampusZen's website and services. By using CampusZen, you agree to be bound by these Terms.
         </p>
       </section>
 
