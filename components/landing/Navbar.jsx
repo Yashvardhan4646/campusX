@@ -94,7 +94,7 @@ export default function Navbar() {
         {
             title: "And much More...",
             description:
-                "Create your account to explore campusX",
+                "Create your account to explore campusZen",
         },
     ];
 
@@ -123,7 +123,7 @@ export default function Navbar() {
                     className="flex items-center gap-2 font-black text-lg lg:text-xl text-[#f0f0f0] hover:opacity-80 transition-opacity shrink-0"
                 >
                     <Zap className="w-5 h-5 lg:w-6 lg:h-6" />
-                    <span className="hidden sm:inline">CampusX</span>
+                    <span className="hidden sm:inline">CampusZen</span>
                 </Link>
 
                 {/* Desktop Navigation */}
