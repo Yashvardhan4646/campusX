@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://campusx.in'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://campuszen.in'
 
 export default function ShareButton({ post, size = "sm" }) {
   const [open, setOpen] = useState(false)
@@ -48,7 +48,7 @@ export default function ShareButton({ post, size = "sm" }) {
     setIsSharing(true)
     try {
       await navigator.share({
-        title: `${getAuthorName()} on CampusX`,
+        title: `${getAuthorName()} on CampusZen`,
         text: getShareText(),
         url: getShareUrl()
       })
@@ -78,7 +78,7 @@ export default function ShareButton({ post, size = "sm" }) {
   const handleTwitterShare = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
-    const text = encodeURIComponent(`${getShareText()} - via @CampusX`)
+    const text = encodeURIComponent(`${getShareText()} - via @CampusZen`)
     const url = encodeURIComponent(getShareUrl())
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank')
     trackShare()
