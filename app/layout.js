@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata = {
   metadataBase: new URL("https://campus-x-rho.vercel.app"),
   title: {
-    default: "CampusX",
-    template: "%s | CampusX",
+    default: "CampusZen",
+    template: "%s | CampusZen",
   },
   verification: {
     google: 'K-xkYw1Y1PqYEcOS3grjVfobh5EH_UFVzU8jESjBzKg'
@@ -18,28 +18,28 @@ export const metadata = {
     "college students india", 
     "campus community", 
     "student platform india", 
-    "campusx",
+    "campuszen",
     "exclusive social media"
   ],
-  authors: [{ name: "CampusX" }],
-  creator: "CampusX",
-  publisher: "CampusX",
+  authors: [{ name: "CampusZen" }],
+  creator: "CampusZen",
+  publisher: "CampusZen",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: "CampusX",
+    title: "CampusZen",
     description: "Connect with your campus community, share notes, and join exclusive student events.",
     url: "https://campus-x-rho.vercel.app",
-    siteName: "CampusX",
+    siteName: "CampusZen",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "CampusX — Student Social Network",
+        alt: "CampusZen — Student Social Network",
       },
     ],
     locale: "en_IN",
@@ -47,10 +47,10 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CampusX",
+    title: "CampusZen",
     description: "The exclusive social network for Indian college students.",
     images: ["/og-image.png"],
-    creator: "@campusx",
+    creator: "@campuszen",
   },
   robots: {
     index: true,
