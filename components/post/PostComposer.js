@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import UserAvatar from "@/components/user/UserAvatar";
 import PollCreator from "@/components/post/PollCreator";
 import MarkdownRenderer from "@/components/shared/MarkdownRenderer";
+import GifPicker from "@/components/post/GifPicker";
+import EmojiPicker from "@/components/post/EmojiPicker";
 import { cn } from "@/lib/utils";
 import { containsMarkdown } from "@/utils/markdown";
 import useUser from "@/hooks/useUser";
@@ -110,6 +112,10 @@ export default function PostComposer({
     const fileInputRef = useRef(null);
     const markdownFileInputRef = useRef(null);
 
+    // Content blocks for GIFs and emojis
+    const [contentBlocks, setContentBlocks] = useState([]);
+    const [selectedGIFs, setSelectedGIFs] = useState([]);
+
     const { startUpload } = useUploadThing("postImageUploader");
 
     // Link preview state
@@ -163,6 +169,43 @@ export default function PostComposer({
         setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     };
 
+    // Add GIF to content blocks
+    const addGif = (gif) => {
+        // Add the GIF file to selectedImages for Cloudinary upload
+        if (gif.file) {
+            setSelectedImages(prev => [...prev, gif.file]);
+        }
+        
+        // Store GIF metadata for content block
+        const gifBlock = {
+            type: 'gif',
+            content: gif.url, // Temporary URL, will be replaced after upload
+            metadata: {
+                title: gif.title,
+                width: gif.width,
+                height: gif.height,
+                aspectRatio: `${gif.width}/${gif.height}`,
+                previewUrl: gif.previewUrl,
+                id: gif.id,
+                isUploading: true
+            }
+        };
+        setContentBlocks(prev => [...prev, gifBlock]);
+        setSelectedGIFs(prev => [...prev, gif]);
+    };
+
+    // Remove GIF from content blocks
+    const removeGif = (index) => {
+        setContentBlocks(prev => prev.filter((_, i) => i !== index));
+        setSelectedGIFs(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Add emoji to content
+    const addEmoji = (emoji) => {
+        // Add emoji as text content
+        setContent(prev => prev + emoji);
+    };
+
     // Handle markdown file import
     const handleMarkdownFileSelect = async (e) => {
         const file = e.target.files?.[0];
@@ -204,8 +247,10 @@ export default function PostComposer({
             }
         }
 
-        // Upload images first if any are selected
+        // Upload images and GIFs first if any are selected
         let uploadedImageUrls = [];
+        let updatedContentBlocks = [...contentBlocks];
+        
         if (selectedImages.length > 0) {
             setIsUploading(true);
             try {
@@ -213,7 +258,37 @@ export default function PostComposer({
                 if (!results || results.length === 0) {
                     throw new Error("Upload returned no results");
                 }
-                uploadedImageUrls = results.map((r) => r.url);
+                
+                // Get all uploaded URLs
+                const allUploadedUrls = results.map((r) => r.url);
+                
+                // Separate regular images from GIFs
+                // GIFs are at the end of selectedImages (added after regular images)
+                const regularImageCount = selectedImages.filter(f => !f.name.startsWith('gif-')).length;
+                const gifCount = selectedImages.filter(f => f.name.startsWith('gif-')).length;
+                
+                // Regular images are first
+                uploadedImageUrls = allUploadedUrls.slice(0, regularImageCount);
+                
+                // GIF URLs are the rest
+                const gifUrls = allUploadedUrls.slice(regularImageCount);
+                
+                // Update contentBlocks with uploaded GIF URLs
+                let gifIndex = 0;
+                updatedContentBlocks = contentBlocks.map(block => {
+                    if (block.type === 'gif' && block.metadata?.isUploading && gifIndex < gifUrls.length) {
+                        return {
+                            ...block,
+                            content: gifUrls[gifIndex++],
+                            metadata: {
+                                ...block.metadata,
+                                isUploading: false
+                            }
+                        };
+                    }
+                    return block;
+                });
+                
             } catch (err) {
                 toast.error("Image upload failed", {
                     description:
@@ -235,6 +310,7 @@ export default function PostComposer({
             images: uploadedImageUrls,
             linkPreview: linkPreview?.url ? { url: linkPreview.url } : null,
             isMarkdown: containsMd,
+            contentBlocks: updatedContentBlocks.length > 0 ? updatedContentBlocks : null,
         };
 
         setIsLoading(true);
@@ -258,6 +334,8 @@ export default function PostComposer({
             setPollOptions(["", ""]);
             setLinkPreview(null);
             setSelectedImages([]);
+            setContentBlocks([]);
+            setSelectedGIFs([]);
             if (onPostCreated) onPostCreated(newPost);
 
             toast.success("Posted!", {
@@ -420,6 +498,35 @@ export default function PostComposer({
                         </div>
                     )}
 
+                    {/* GIF Preview Strip */}
+                    {selectedGIFs.length > 0 && (
+                        <div className="mt-2 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                            {selectedGIFs.map((gif, i) => (
+                                <div
+                                    key={i}
+                                    className="relative shrink-0 w-24 h-16 rounded-lg overflow-hidden bg-accent/20 group"
+                                >
+                                    <img
+                                        src={gif.previewUrl}
+                                        alt={gif.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeGif(i)}
+                                        className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-background/80 hover:bg-background text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                        aria-label="Remove GIF"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                    <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-black/50 text-white px-1 rounded">
+                                        GIF
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-3 border-t border-border gap-3">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
                             <div className="flex items-center gap-1">
@@ -522,6 +629,50 @@ export default function PostComposer({
                                 >
                                     <FileCode className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </Button>
+
+                                {/* GIF Picker Button */}
+                                <GifPicker
+                                    onSelect={addGif}
+                                    trigger={
+                                        <Button
+                                            title="Add GIF"
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className={cn(
+                                                "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
+                                                selectedGIFs.length > 0
+                                                    ? "text-primary bg-primary/10"
+                                                    : "text-muted-foreground hover:text-primary",
+                                            )}
+                                            aria-label="Add GIF"
+                                        >
+                                            <span className="text-xs font-medium">GIF</span>
+                                        </Button>
+                                    }
+                                />
+
+                                {/* Emoji Picker Button */}
+                                <EmojiPicker
+                                    onSelect={addEmoji}
+                                    trigger={
+                                        <Button
+                                            title="Add emoji"
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="hover:cursor-pointer h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3 transition-colors"
+                                            aria-label="Add emoji"
+                                        >
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                            </svg>
+                                        </Button>
+                                    }
+                                />
                             </div>
                         </div>
 
