@@ -13,6 +13,7 @@ import LikeButton from './LikeButton'
 import PostContent from './PostContent'
 import PostOptionsMenu from './PostOptionsMenu'
 import ShareButton from './ShareButton'
+import ContentBlockRenderer from './ContentBlockRenderer'
 
 // Lazy load heavy dialogs/modals
 const CommentSection = dynamic(() => import('@/components/post/CommentSection'), { ssr: false })
@@ -111,6 +112,13 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
           <div className="mt-1">
             <PostContent content={post.content} isMarkdown={post.isMarkdown} />
           </div>
+
+          {/* Rich Content Blocks (GIFs, emojis) */}
+          {post.contentBlocks?.length > 0 && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ContentBlockRenderer blocks={post.contentBlocks} className="mt-2" />
+            </div>
+          )}
 
           {post.images?.length > 0 && (
             <div onClick={(e) => e.stopPropagation()}>
