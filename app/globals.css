@@ -74,6 +74,13 @@
     --input: 240 5% 10%;
     --ring: 252 87% 67%;
     --radius: 0.5rem;
+    --brand: 252 87% 67%;
+    --brand-foreground: 252 87% 57%;
+  }
+ 
+  .dark {
+    --brand: 252 87% 67%;
+    --brand-foreground: 252 87% 57%;
   }
 }
 
@@ -179,6 +186,88 @@
     background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     background-size: 64px 64px;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+  .delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes bloom-up {
+    0% {
+      transform: translateY(100%) scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(0%) scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes flow-up {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(-50%);
+      opacity: 0;
+    }
+  }
+
+  .animate-bloom-up {
+    animation: bloom-up 4s ease-in-out infinite;
+  }
+
+  .animate-flow-up {
+    animation: flow-up 3s ease-in-out infinite;
+  }
+
+  .fade-bottom {
+    position: relative;
+  }
+  
+  .fade-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background: linear-gradient(to bottom, transparent, var(--background));
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .max-w-container {
+    max-width: 1200px;
   }
 }
 
