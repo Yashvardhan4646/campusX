@@ -120,7 +120,7 @@ export default function Navbar() {
                 {/* Logo */}
                 <Link
                     href="/"
-                    className="flex items-center gap-2 font-black text-lg lg:text-xl text-[#f0f0f0] hover:opacity-80 transition-opacity shrink-0"
+                    className="flex items-center gap-2 text-lg lg:text-xl text-[#f0f0f0] hover:opacity-80 transition-opacity shrink-0"
                 >
                     <Zap className="w-5 h-5 lg:w-6 lg:h-6" />
                     <span className="hidden sm:inline">CampusZen</span>
@@ -128,72 +128,81 @@ export default function Navbar() {
 
                 {/* Desktop Navigation */}
                 <div className="hidden lg:flex flex-1 justify-center">
-                    <div className="flex items-center gap-6 lg:gap-8">
-                        <NavigationMenu>
-                            <NavigationMenuList>
-                                {/* Features Dropdown */}
-                                <NavigationMenuItem>
-                                    <NavigationMenuTrigger className="text-[#a0a0a0] hover:text-[#f0f0f0] bg-transparent border-0 hover:bg-transparent">
-                                        Features
-                                    </NavigationMenuTrigger>
-                                    <NavigationMenuContent className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl">
-                                        <div className="grid gap-3 p-4 w-96">
-                                            {featuresItems.map((item) => (
-                                                <div
-                                                    key={item.title}
-                                                    className="group cursor-pointer rounded-lg px-4 py-3 transition-all hover:bg-[#2a2a2a]"
-                                                >
-                                                    <p className="font-semibold text-[#f0f0f0] group-hover:text-[hsl(var(--primary))]">
-                                                        {item.title}
-                                                    </p>
-                                                    <p className="text-sm text-[#808080]">
-                                                        {item.description}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </NavigationMenuContent>
-                                </NavigationMenuItem>
+                    <NavigationMenu>
+                        <NavigationMenuList className="flex items-center gap-1">
+                            {/* Feed Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/feed"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Feed
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
 
-                                {/* Campus Coins Link */}
-                                <NavigationMenuItem>
-                                    <NavigationMenuLink asChild>
-                                        <Link
-                                            href="#coins"
-                                            className="text-[#a0a0a0] hover:text-[#f0f0f0] px-3 py-2 transition-colors whitespace-nowrap"
-                                        >
-                                            Campus Coins
-                                        </Link>
-                                    </NavigationMenuLink>
-                                </NavigationMenuItem>
+                            {/* Resources Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/resources"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Resources
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
 
-                                {/* About Dropdown */}
-                                {/* <NavigationMenuItem>
-                                <NavigationMenuTrigger className="text-[#a0a0a0] hover:text-[#f0f0f0] bg-transparent border-0 hover:bg-transparent">
-                                    About
-                                </NavigationMenuTrigger>
-                                <NavigationMenuContent className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg shadow-xl">
-                                    <div className="grid gap-3 p-4 w-64">
-                                        {aboutItems.map((item) => {
-                                            const IconComponent = item.icon;
-                                            return (
-                                                <div
-                                                    key={item.label}
-                                                    className="group cursor-pointer rounded-lg px-4 py-3 transition-all hover:bg-[#2a2a2a] flex items-center gap-3"
-                                                >
-                                                    <IconComponent className="w-5 h-5 text-[hsl(var(--primary))] group-hover:scale-110 transition-transform" />
-                                                    <p className="font-semibold text-[#f0f0f0] group-hover:text-[hsl(var(--primary))]">
-                                                        {item.label}
-                                                    </p>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem> */}
-                            </NavigationMenuList>
-                        </NavigationMenu>
-                    </div>
+                            {/* Community Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/community"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Community
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
+
+                            {/* Events Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/events"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Events
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
+
+                            {/* Search Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/search"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Search
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
+
+                            {/* Leaderboard Link */}
+                            <NavigationMenuItem>
+                                <NavigationMenuLink asChild>
+                                    <Link
+                                        href="/leaderboard"
+                                        className="text-[#a0a0a0] hover:text-[#f0f0f0] px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-[#f0f0f0]/10 rounded-md whitespace-nowrap"
+                                    >
+                                        Leaderboard
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
+                        </NavigationMenuList>
+                    </NavigationMenu>
                 </div>
 
                 {/* Right Side - Desktop Buttons */}
@@ -291,31 +300,54 @@ export default function Navbar() {
                             className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg p-4 space-y-3 mt-2 max-w-96"
                             align="end"
                         >
-                            {/* Mobile Features */}
+                            {/* Mobile Navigation Links */}
                             <div className="space-y-2">
                                 <p className="font-semibold text-[#f0f0f0] px-2">
-                                    Features
+                                    Navigation
                                 </p>
-                                {featuresItems.map((item) => (
-                                    <Link
-                                        key={item.title}
-                                        href="#"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
-                                    >
-                                        {item.title}
-                                    </Link>
-                                ))}
+                                <Link
+                                    href="/feed"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Feed
+                                </Link>
+                                <Link
+                                    href="/resources"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Resources
+                                </Link>
+                                <Link
+                                    href="/community"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Community
+                                </Link>
+                                <Link
+                                    href="/events"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Events
+                                </Link>
+                                <Link
+                                    href="/search"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Search
+                                </Link>
+                                <Link
+                                    href="/leaderboard"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
+                                >
+                                    Leaderboard
+                                </Link>
                             </div>
-
-                            {/* Mobile Campus Coins */}
-                            <Link
-                                href="#coins"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-2 rounded-lg text-[#a0a0a0] hover:bg-[#2a2a2a] hover:text-[#f0f0f0] transition-colors"
-                            >
-                                Campus Coins
-                            </Link>
 
                             {/* Mobile About */}
                             {/* <div className="space-y-2">
