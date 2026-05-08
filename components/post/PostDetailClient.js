@@ -21,6 +21,7 @@ import UserAvatar from "@/components/user/UserAvatar"
 import PollDisplay from "@/components/post/PollDisplay"
 import CommentItem from "@/components/post/CommentItem"
 import LikeButton from './LikeButton'
+import ContentBlockRenderer from './ContentBlockRenderer'
 import { renderContentWithMentions, extractUrls } from "@/utils/hashtags"
 import UserMention from "@/components/shared/UserMention"
 import LinkPreview from "@/components/shared/LinkPreview"
@@ -280,6 +281,13 @@ export default function PostDetailClient({ postId }) {
             </div>
           )}
         </div>
+
+        {/* Rich Content Blocks (GIFs, emojis) */}
+        {post.contentBlocks?.length > 0 && (
+          <div className="mb-6">
+            <ContentBlockRenderer blocks={post.contentBlocks} />
+          </div>
+        )}
 
         {/* Link Previews */}
         <div className="mb-6 space-y-4">
