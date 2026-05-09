@@ -157,6 +157,16 @@ const userSchema = new mongoose.Schema({
   mutedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
 
+  // Chat privacy settings
+  chatPrivacy: {
+    type: String,
+    enum: ['everyone', 'verified', 'college', 'followers', 'none'],
+    default: 'everyone'
+  },
+  // Chat requests
+  receivedChatRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRequest', default: [] }],
+  sentChatRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRequest', default: [] }],
+
   // Streak 
   currentStreak:  { type: Number, default: 0 }, 
   longestStreak:  { type: Number, default: 0 }, 
@@ -211,6 +221,10 @@ userSchema.index({ blockedUsers: 1 })
 // Verification indexes
 userSchema.index({ collegeEmail: 1 }, { unique: true, sparse: true })
 userSchema.index({ verificationStatus: 1, verificationRequestedAt: -1 })
+// Chat privacy indexes
+userSchema.index({ chatPrivacy: 1 })
+userSchema.index({ receivedChatRequests: 1 })
+userSchema.index({ sentChatRequests: 1 })
 
 // Force re-compilation of the User model in development to pick up schema changes
 if (mongoose.models.User) {

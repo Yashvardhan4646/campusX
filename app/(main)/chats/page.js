@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ChatsPage() {
   const [groups, setGroups] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [groupsLoading, setGroupsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const { user: currentUser } = useUser()
@@ -23,9 +23,10 @@ export default function ChatsPage() {
     fetchGroups()
   }, [])
 
+
   const fetchGroups = async () => {
     try {
-      setLoading(true)
+      setGroupsLoading(true)
       const res = await fetch('/api/groups')
       const data = await res.json()
       if (res.ok) {
@@ -34,7 +35,7 @@ export default function ChatsPage() {
     } catch (error) {
       console.error('Failed to fetch groups:', error)
     } finally {
-      setLoading(false)
+      setGroupsLoading(false)
     }
   }
 
@@ -48,14 +49,15 @@ export default function ChatsPage() {
       {/* Sticky Header */} 
       <div className="sticky top-0 bg-background/80 backdrop-blur border-b z-10 px-4 py-3"> 
         <div className="flex items-center justify-between mb-3"> 
-          <h1 className="text-xl font-bold">💬 Chats</h1> 
+          <h1 className="text-xl font-bold">💬 Group Chats</h1> 
           <Button size="sm" onClick={() => setCreateOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90"> 
             <Plus className="w-4 h-4 mr-1" /> New Group 
           </Button> 
         </div> 
  
+
         {/* Search */} 
-        <div className="relative"> 
+        <div className="relative mt-3"> 
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /> 
           <Input 
             placeholder="Search groups..." 
@@ -63,12 +65,12 @@ export default function ChatsPage() {
             onChange={(e) => setSearchQuery(e.target.value)} 
             className="pl-9 h-9 text-sm bg-accent/50 border-border/50 focus-visible:ring-primary/50" 
           /> 
-        </div> 
+        </div>
       </div> 
  
-      {/* Groups list */} 
+      {/* Content */} 
       <div className="flex-1 overflow-y-auto"> 
-        {loading ? ( 
+        {groupsLoading ? ( 
           Array(5).fill(0).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
               <Skeleton className="w-12 h-12 rounded-full" />
@@ -97,10 +99,10 @@ export default function ChatsPage() {
               onClick={() => router.push(`/chats/${group._id}`)} 
             /> 
           )) 
-        )} 
+        )}
       </div> 
       
-      {/* Create Group Modal */}
+      {/* Modals */}
       <CreateGroupModal 
         open={createOpen} 
         onOpenChange={setCreateOpen} 

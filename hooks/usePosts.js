@@ -64,13 +64,22 @@ export function usePosts(queryParams = {}, initialPosts = []) {
     fetchPosts(nextPage, true)  // append = true
   }, [page, hasMore, loading, fetchPosts])
 
+  // Reset loading state and refresh
+  const refresh = useCallback(async () => {
+    // Force reset loading state in case it's stuck
+    setLoading(false)
+    // Small delay to ensure state update propagates
+    await new Promise(resolve => setTimeout(resolve, 10))
+    return fetchPosts(1, false)
+  }, [fetchPosts])
+
   return {
     posts,
     loading,
     error,
     hasMore,
     loadMore,
-    refresh: () => fetchPosts(1, false),
+    refresh,
     addPost: (post) => setPosts(prev => [post, ...prev]),
     removePost: (id) => setPosts(prev => prev.filter(p => p._id !== id)),
     updatePostLike: async (postId) => {

@@ -2,6 +2,7 @@
 
 import { FileText } from "lucide-react"
 import { useCallback } from "react"
+import { useEffect } from "react"
 import dynamic from 'next/dynamic'
 import PostCard from "@/components/post/PostCard"
 import PostSkeleton from "@/components/post/PostSkeleton"
@@ -48,6 +49,15 @@ export default function FeedPage() {
   const handleRefreshFeed = useCallback(() => {
     refreshPosts()
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [refreshPosts])
+
+  // Listen for refresh events from the floating refresh button
+  useEffect(() => {
+    const handleRefreshEvent = () => {
+      refreshPosts()
+    }
+    window.addEventListener('cx-refresh-feed', handleRefreshEvent)
+    return () => window.removeEventListener('cx-refresh-feed', handleRefreshEvent)
   }, [refreshPosts])
 
   const { sentinelRef } = useInfiniteScroll({

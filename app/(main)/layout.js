@@ -5,6 +5,7 @@ import Sidebar from "@/components/layout/Sidebar"
 import RightPanel from "@/components/layout/RightPanel"
 import MobileNav from "@/components/layout/MobileNav"
 import MobileFAB from "@/components/layout/MobileFAB"
+import FeedRefreshButton from "@/components/feed/FeedRefreshButton"
 import { Toaster } from "@/components/ui/sonner"
 import BroadcastBanner from "@/components/founder/BroadcastBanner"
 import VerificationBanner from "@/components/shared/VerificationBanner"
@@ -62,6 +63,9 @@ export default function MainLayout({ children }) {
 
         {/* Mobile Floating Action Button — Hide in chat room */}
         {!isChatRoom && <MobileFAB />}
+
+        {/* Feed Refresh Button — Only on feed page */}
+        {pathname === '/feed' && <FeedRefreshButton />}
 
         {/* Toast Notifications */}
         <Toaster position="bottom-center" />
