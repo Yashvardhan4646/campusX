@@ -73,7 +73,7 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ message: 'No fields to update' }, { status: 400 })
     }
 
-    const { name, bio, college, course, year } = body
+    const { name, bio, college, course, year, banner } = body
     const updateData = {}
 
     if (name !== undefined)    updateData.name    = sanitizeText(name).slice(0, 50)
@@ -81,6 +81,7 @@ export async function PATCH(request, { params }) {
     if (college !== undefined) updateData.college = sanitizeText(college).slice(0, 100)
     if (course !== undefined)  updateData.course  = sanitizeText(course).slice(0, 100)
     if (year !== undefined)    updateData.year    = Math.min(6, Math.max(1, parseInt(year) || 1))
+    if (banner !== undefined)  updateData.banner  = sanitizeText(banner).slice(0, 500)
 
     await connectDB()
 

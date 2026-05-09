@@ -18,10 +18,13 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
 
   const [avatarPreview, setAvatarPreview]     = useState(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [bannerPreview, setBannerPreview]     = useState(null)
+  const [uploadingBanner, setUploadingBanner] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(null)
 
   const fileInputRef = useRef(null)
+  const bannerFileInputRef = useRef(null)
 
   useEffect(() => {
     if (open && user) {
@@ -31,12 +34,17 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
       setCourse(user.course || '')
       setYear(user.year || 1)
       setAvatarPreview(null)
+      setBannerPreview(null)
       setError(null)
     }
   }, [open, user])
 
   const triggerFileInput = () => {
     if (!uploadingAvatar && !saving) fileInputRef.current?.click()
+  }
+
+  const triggerBannerFileInput = () => {
+    if (!uploadingBanner && !saving) bannerFileInputRef.current?.click()
   }
 
   const handleAvatarChange = async (e) => {
@@ -60,6 +68,30 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
       toast.error(err.message || "Failed to upload avatar")
     } finally {
       setUploadingAvatar(false)
+    }
+  }
+
+  const handleBannerChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowed.includes(file.type)) { toast.error("Only JPG, PNG and WebP allowed"); return }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return }
+
+    setBannerPreview(URL.createObjectURL(file))
+    setUploadingBanner(true)
+    const formData = new FormData()
+    formData.append('banner', file)
+    try {
+      const res = await fetch('/api/users/banner', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (res.ok) { toast.success("Banner updated! ✨"); setBannerPreview(data.bannerUrl) }
+      else throw new Error(data.message || "Upload failed")
+    } catch (err) {
+      setBannerPreview(null)
+      toast.error(err.message || "Failed to upload banner")
+    } finally {
+      setUploadingBanner(false)
     }
   }
 
@@ -102,6 +134,42 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
           <SheetTitle>Edit Profile</SheetTitle>
           <SheetDescription className="sr-only">Edit your profile information</SheetDescription>
         </SheetHeader>
+
+        {/* Banner */}
+        <div className="relative group cursor-pointer" onClick={triggerBannerFileInput}>
+          <div className="w-full h-32 bg-accent border-b border-border relative overflow-hidden">
+            {(bannerPreview || user?.banner) ? (
+              <Image 
+                src={bannerPreview || user.banner} 
+                alt="Banner" 
+                fill 
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500/20 to-purple-500/20">
+                <div className="text-center">
+                  <Camera className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Add a banner</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            {uploadingBanner
+              ? <Loader2 className="w-6 h-6 animate-spin text-white" />
+              : <Camera className="w-6 h-6 text-white" />}
+          </div>
+          <input
+            ref={bannerFileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            className="hidden"
+            onChange={handleBannerChange}
+            disabled={uploadingBanner || saving}
+          />
+        </div>
+        <p className="text-[10px] text-muted-foreground px-6 pt-2 pb-3">Click to change banner · JPG, PNG, WebP · 5MB max · Recommended: 1500x500px</p>
 
         {/* Avatar */}
         <div className="flex flex-col items-center py-5 border-b border-border">
@@ -204,7 +272,7 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
           <Button variant="outline" className="flex-1 rounded-full" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancel
           </Button>
-          <Button className="flex-1 rounded-full" onClick={handleSave} disabled={saving || uploadingAvatar}>
+          <Button className="flex-1 rounded-full" onClick={handleSave} disabled={saving || uploadingAvatar || uploadingBanner}>
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
           </Button>
         </div>

@@ -21,6 +21,7 @@ import InfiniteScrollSentinel from "@/components/shared/InfiniteScrollSentinel"
 import { isFounder } from "@/lib/founder"
 import { renderContentWithMentions } from "@/utils/hashtags"
 import UserMention from "@/components/shared/UserMention"
+import { getBannerUrl } from "@/utils/defaultBanner"
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -171,7 +172,16 @@ export default function ProfileClient({ username: initialUsername }) {
         />
       ) : (
         <div className="flex flex-col">
-          <div className="h-32 bg-[#1a1a1a] relative overflow-hidden" />
+          <div className="h-32 relative overflow-hidden">
+            <Image 
+              src={getBannerUrl(profileUser?.banner, profileUser?.username)}
+              alt={`${profileUser?.name}'s banner`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+            />
+          </div>
 
           <div className="px-4 pb-4">
             <div className="flex justify-between items-end -mt-16 mb-3 relative z-10">
