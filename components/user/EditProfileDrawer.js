@@ -20,6 +20,14 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [bannerPreview, setBannerPreview]     = useState(null)
   const [uploadingBanner, setUploadingBanner] = useState(false)
+  
+  // Social links state
+  const [twitter, setTwitter]       = useState('')
+  const [instagram, setInstagram]   = useState('')
+  const [linkedin, setLinkedin]     = useState('')
+  const [github, setGithub]         = useState('')
+  const [website, setWebsite]       = useState('')
+  
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(null)
 
@@ -35,6 +43,14 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
       setYear(user.year || 1)
       setAvatarPreview(null)
       setBannerPreview(null)
+      
+      // Initialize social links from user data
+      setTwitter(user.socialLinks?.twitter || '')
+      setInstagram(user.socialLinks?.instagram || '')
+      setLinkedin(user.socialLinks?.linkedin || '')
+      setGithub(user.socialLinks?.github || '')
+      setWebsite(user.socialLinks?.website || '')
+      
       setError(null)
     }
   }, [open, user])
@@ -110,6 +126,13 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
           college: college.trim(),
           course: course.trim(),
           year: Number(year),
+          socialLinks: {
+            twitter: twitter.trim(),
+            instagram: instagram.trim(),
+            linkedin: linkedin.trim(),
+            github: github.trim(),
+            website: website.trim(),
+          },
         })
       })
       const data = await res.json()
@@ -234,6 +257,63 @@ export default function EditProfileDrawer({ user, open, onOpenChange, onSave }) 
             <p className={`text-[10px] text-right ${bio.length > 140 ? 'text-amber-500' : 'text-muted-foreground'}`}>
               {bio.length}/160
             </p>
+          </div>
+
+          {/* Social Links */}
+          <div className="space-y-4">
+            <label className="text-sm font-medium text-muted-foreground">Social Links</label>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">Twitter</label>
+                <Input 
+                  value={twitter} 
+                  onChange={e => setTwitter(e.target.value)} 
+                  placeholder="https://twitter.com/username" 
+                  maxLength={100} 
+                  disabled={saving} 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">Instagram</label>
+                <Input 
+                  value={instagram} 
+                  onChange={e => setInstagram(e.target.value)} 
+                  placeholder="https://instagram.com/username" 
+                  maxLength={100} 
+                  disabled={saving} 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">LinkedIn</label>
+                <Input 
+                  value={linkedin} 
+                  onChange={e => setLinkedin(e.target.value)} 
+                  placeholder="https://linkedin.com/in/username" 
+                  maxLength={100} 
+                  disabled={saving} 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">GitHub</label>
+                <Input 
+                  value={github} 
+                  onChange={e => setGithub(e.target.value)} 
+                  placeholder="https://github.com/username" 
+                  maxLength={100} 
+                  disabled={saving} 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">Website</label>
+                <Input 
+                  value={website} 
+                  onChange={e => setWebsite(e.target.value)} 
+                  placeholder="https://yourwebsite.com" 
+                  maxLength={100} 
+                  disabled={saving} 
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1.5">
