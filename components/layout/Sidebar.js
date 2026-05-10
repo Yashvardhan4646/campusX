@@ -20,7 +20,8 @@ import {
   History,
   Heart,
   Coins,
-  ShoppingBag
+  ShoppingBag,
+  Compass
 } from "lucide-react"
 import { useChatUnreadCount } from '@/hooks/useChatUnreadCount'
 import { Button } from "@/components/ui/button"
@@ -54,6 +55,7 @@ export default function Sidebar() {
   const navItems = [
     { label: "Feed", href: "/feed", icon: Home },
     { label: "Search", href: "/search", icon: Search },
+    { label: "Explore", href: "/explore", icon: Compass },
     { label: "Resources", href: "/resources", icon: BookOpen },
     { label: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
     { label: "Chats", href: "/chats", icon: MessageSquare, badge: chatUnread },
