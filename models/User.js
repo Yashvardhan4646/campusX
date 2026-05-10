@@ -161,6 +161,12 @@ const userSchema = new mongoose.Schema({
   mutedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
 
+  // Badges
+  badges: [{
+    badgeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Badge' },
+    awardedAt: { type: Date, default: Date.now }
+  }],
+
   // Chat privacy settings
   chatPrivacy: {
     type: String,
@@ -230,11 +236,6 @@ userSchema.index({ chatPrivacy: 1 })
 userSchema.index({ receivedChatRequests: 1 })
 userSchema.index({ sentChatRequests: 1 })
 
-// Force re-compilation of the User model in development to pick up schema changes
-if (mongoose.models.User) {
-  delete mongoose.models.User;
-}
-
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;
