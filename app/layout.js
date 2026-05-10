@@ -2,6 +2,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
+import SchemaMarkup from "@/components/shared/SchemaMarkup";
 
 export const metadata = {
   metadataBase: new URL("https://campus-x-rho.vercel.app"),
@@ -28,6 +29,9 @@ export const metadata = {
     email: false,
     address: false,
     telephone: false,
+  },
+  alternates: {
+    canonical: "/",
   },
   openGraph: {
     title: "CampusZen",
@@ -83,6 +87,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <SchemaMarkup />
         {children}
         <Analytics />
         <SpeedInsights />
