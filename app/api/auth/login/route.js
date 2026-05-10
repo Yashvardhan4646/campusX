@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import User from '@/models/User';
 import LoginHistory from '@/models/LoginHistory';
 import { signToken, setAuthCookie } from '@/lib/auth';
+import { updateStreak } from '@/lib/gamification';
 import { applyRateLimit, rateLimit } from '@/lib/rate-limit';
 import { sanitizeUser, sanitizeMongoInput } from '@/lib/sanitize';
 import { sendSuspiciousLoginEmail } from '@/lib/email-templates';
@@ -94,6 +95,9 @@ export async function POST(request) {
     const userAgent = request.headers.get('user-agent') || ''
     const { device, browser } = parseUserAgent(userAgent)
     const ipAddress = getClientIp(request)
+    
+    // Update streak and handle login history in background
+    updateStreak(user._id).catch(err => console.error('Streak update error:', err));
     
     // Check last 5 logins for this user
     const recentLogins = await LoginHistory.find({ userId: user._id })
