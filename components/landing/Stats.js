@@ -54,6 +54,14 @@ export default function Stats({ users = 50, posts = 120, resources = 20, codeAre
   return (
     <section className="py-24 px-4 relative overflow-hidden bg-[#0f0f0f]">
       <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-2xl font-bold text-white/40 uppercase tracking-[0.2em] mb-4">
+            Platform Impact
+          </h2>
+          <p className="text-4xl md:text-5xl font-black text-white tracking-tight">
+            Trusted by students across India
+          </p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" ref={sectionRef}>
           {STATS_CONFIG.map((stat, i) => (
             <div key={i} className="relative p-6 rounded-3xl overflow-hidden bg-[#0f0f0f] group border border-white/5">
