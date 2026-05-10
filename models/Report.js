@@ -35,10 +35,6 @@ const reportSchema = new mongoose.Schema({
 reportSchema.index({ status: 1, createdAt: -1 });
 reportSchema.index({ postId: 1 });
 
-if (mongoose.models.Report) {
-  delete mongoose.models.Report;
-}
-
-const Report = mongoose.model('Report', reportSchema);
+const Report = mongoose.models.Report || mongoose.model('Report', reportSchema);
 
 export default Report;
