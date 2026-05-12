@@ -162,7 +162,6 @@ campusx/
 │   │   └── verify/          # OTP verification
 │   ├── (main)/
 │   │   ├── feed/            # Smart algorithm feed
-│   │   ├── explore/         # Discover posts + users
 │   │   ├── communities/     # Community rooms
 │   │   ├── notifications/   # Real-time notifications
 │   │   └── profile/[id]/    # User profiles
