@@ -1,8 +1,7 @@
 "use client"
 
-import { FileText } from "lucide-react"
-import { useCallback } from "react"
-import { useEffect } from "react"
+import { FileText, Users } from "lucide-react"
+import { useCallback, useState, useEffect } from "react"
 import dynamic from 'next/dynamic'
 import PostCard from "@/components/post/PostCard"
 import PostSkeleton from "@/components/post/PostSkeleton"
@@ -13,6 +12,7 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll"
 import { useNotifications } from "@/hooks/useNotifications"
 import InfiniteScrollSentinel from "@/components/shared/InfiniteScrollSentinel"
 import PushPromptManager from "@/components/notifications/PushPromptManager"
+import CommunitySwitcher from "@/components/feed/CommunitySwitcher"
 
 // Lazy load heavy components
 const PostComposer = dynamic(
@@ -32,6 +32,8 @@ const PostComposer = dynamic(
 
 export default function FeedPage() {
   const { user: currentUser, refetch: refetchCurrentUser } = useUser()
+  const [selectedCommunity, setSelectedCommunity] = useState(null)
+  
   const {
     posts,
     loading,
@@ -42,7 +44,7 @@ export default function FeedPage() {
     removePost,
     updatePostLike,
     refresh: refreshPosts
-  } = usePosts()
+  } = usePosts(selectedCommunity ? { community: selectedCommunity } : {})
 
   const { newNotification } = useNotifications()
 
@@ -86,14 +88,24 @@ export default function FeedPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Feed header */}
-      <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border p-4 z-20">
-        <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">
-          Hey, {currentUser?.name || 'User'}
-        </h1>
+      <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border p-4 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">
+            Hey, {currentUser?.name || 'User'}
+          </h1>
+          <p className="text-xs text-muted-foreground">Welcome to your campus feed</p>
+        </div>
+        <CommunitySwitcher 
+          selectedCommunity={selectedCommunity} 
+          onSelect={setSelectedCommunity} 
+        />
       </div>
 
       {/* Post composer */}
-      <PostComposer onPostCreated={handlePostCreated} />
+      <PostComposer 
+        onPostCreated={handlePostCreated} 
+        defaultCommunity={selectedCommunity}
+      />
 
       {/* Push permission banner */}
       <PushPromptManager newNotification={newNotification} />
@@ -106,7 +118,7 @@ export default function FeedPage() {
           <EmptyState
             icon={FileText}
             title="No posts yet"
-            description="Be the first to post what's happening on campus!"
+            description={selectedCommunity ? `Be the first to post in ${selectedCommunity}!` : "Be the first to post what's happening on campus!"}
           />
         ) : (
           <>
