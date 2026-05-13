@@ -32,10 +32,12 @@ import {
     Users2,
     Trophy,
     Calendar,
+    Smartphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/shared/Logo";
 import { AnimatePresence } from "framer-motion";
+import config from "@/lib/config";
 
 export default function Navbar() {
     const router = useRouter();
@@ -126,6 +128,12 @@ export default function Navbar() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3 shrink-0">
+                    <Button asChild variant="ghost" size="sm" className="rounded-full text-neutral-400 hover:text-white h-9 px-3 hidden md:flex gap-2">
+                        <Link href={config.links.apkDownload || "#"} target="_blank">
+                            <Smartphone className="w-4 h-4" />
+                            <span className="text-xs font-medium">APK</span>
+                        </Link>
+                    </Button>
                     {mounted && !loading && user ? ( 
                         <Popover>
                             <PopoverTrigger asChild>

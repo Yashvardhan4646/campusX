@@ -1,8 +1,9 @@
 "use client"
 
 import { HeroSection } from "@/components/ui/hero-section"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Smartphone } from "lucide-react"
 import RotatingText from "@/components/ui/RotatingText"
+import config from "@/lib/config"
 
 export function HeroSectionDemo() {
   return (
@@ -40,9 +41,15 @@ export function HeroSectionDemo() {
           variant: "glow",
         },
         {
+          text: "Download APK",
+          href: config.links.apkDownload || "#",
+          variant: "outline",
+          icon: <Smartphone className="h-5 w-5" />,
+        },
+        {
           text: "Explore Features",
           href: "#features",
-          variant: "default",
+          variant: "ghost",
           icon: <ArrowRight className="h-5 w-5" />,
         },
       ]}

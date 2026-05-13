@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, GraduationCap, PlusSquare, User, Bell, Bookmark, LogOut, Menu, Search, Calendar, Settings, MessageSquare, Shield, BookOpen, BarChart2, Terminal, Type, History, Heart, Palette } from "lucide-react"
+import { Home, GraduationCap, PlusSquare, User, Bell, Bookmark, LogOut, Menu, Search, Calendar, Settings, MessageSquare, Shield, BookOpen, BarChart2, Terminal, Type, History, Heart, Palette, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -21,6 +21,7 @@ import CreatePostDialog from "@/components/post/CreatePostDialog"
 import Logo from "@/components/shared/Logo"
 import { cn } from "@/lib/utils"
 import { isAdmin } from "@/lib/admin"
+import config from "@/lib/config"
 
 export default function MobileNav() {
   const pathname = usePathname()
@@ -332,7 +333,17 @@ export default function MobileNav() {
             </nav>
           </div>
 
-          <div className="p-4 border-t mt-auto">
+          <div className="p-4 border-t mt-auto space-y-2">
+            <Link href={config.links.apkDownload || "#"} target="_blank" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 h-12 px-3 text-primary hover:text-primary hover:bg-primary/10"
+              >
+                <Smartphone className="w-5 h-5" />
+                <span className="text-base font-medium">Download APK</span>
+              </Button>
+            </Link>
+
             <Button
               variant="ghost"
               onClick={handleLogout}

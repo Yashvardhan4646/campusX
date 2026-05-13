@@ -24,7 +24,8 @@ import {
   Heart,
   Coins,
   ShoppingBag,
-  Trophy
+  Trophy,
+  Smartphone
 } from "lucide-react"
 import { useChatUnreadCount } from '@/hooks/useChatUnreadCount'
 import { Button } from "@/components/ui/button"
@@ -37,6 +38,7 @@ import NotificationBell from '@/components/notifications/NotificationBell'
 import { cn } from "@/lib/utils"
 import { isFounder } from "@/lib/founder"
 import { isAdmin } from "@/lib/admin"
+import config from "@/lib/config"
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -240,18 +242,30 @@ export default function Sidebar() {
           </div>
         )}
 
-        <div className="flex items-center gap-1.5">
-          <div className="shrink-0">
-            <NotificationBell currentUser={user} />
+        <div className="flex flex-col gap-1.5">
+          <Link href={config.links.apkDownload || "#"} target="_blank">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-9 px-2 text-primary hover:text-primary hover:bg-primary/10"
+            >
+              <Smartphone className="w-4.5 h-4.5 shrink-0" />
+              <span className="hidden lg:block text-xs font-bold">Download APK</span>
+            </Button>
+          </Link>
+
+          <div className="flex items-center gap-1.5">
+            <div className="shrink-0">
+              <NotificationBell currentUser={user} />
+            </div>
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="flex-1 justify-start gap-3 h-9 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="w-4.5 h-4.5 shrink-0" />
+              <span className="hidden lg:block text-xs font-bold">Log out</span>
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="flex-1 justify-start gap-3 h-9 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="w-4.5 h-4.5 shrink-0" />
-            <span className="hidden lg:block text-xs font-bold">Log out</span>
-          </Button>
         </div>
       </div>
     </aside>
