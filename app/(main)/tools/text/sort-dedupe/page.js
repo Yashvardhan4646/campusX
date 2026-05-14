@@ -84,7 +84,7 @@ export default function SortDedupeTool() {
             title="Line Sort & Dedupe"
             description="Organize your lists by sorting lines and removing duplicates instantly."
         >
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                 <div className="lg:col-span-1 space-y-6">
                     <div className="p-6 rounded-2xl border border-border bg-card space-y-6">
                         <div className="space-y-2">
