@@ -69,7 +69,7 @@ export default function FakerTool() {
             id: faker.string.uuid(),
             name: faker.company.name(),
             catchPhrase: faker.company.catchPhrase(),
-            bs: faker.company.bs(),
+            bs: faker.company.buzzVerb(),
             website: faker.internet.url(),
             email: faker.internet.email()
           }
