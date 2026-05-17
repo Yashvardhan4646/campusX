@@ -65,8 +65,6 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
     }
   }, [isBookmarked, onBookmark, post._id])
 
-  const isPostFounder = post.author && typeof post.author === 'object' && isFounder(post.author.username)
-
   return (
     <div
       ref={postRef}
@@ -88,11 +86,6 @@ const PostCard = memo(function PostCard({ post, currentUserId, onDelete, onLike,
                     <VerifiedBadge size="sm" verificationType={post.author.verificationType} />
                   )}
                 </Link>
-                {isPostFounder && (
-                  <span className="shrink-0">
-                    <FounderBadges size="sm" />
-                  </span>
-                )}
                 <span className="text-muted-foreground truncate">@{post.author.username}</span>
             <span className="text-muted-foreground">·</span>
             <Link 
