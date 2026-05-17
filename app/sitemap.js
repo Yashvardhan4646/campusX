@@ -16,7 +16,7 @@ export default async function sitemap() {
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: route === '' ? 'daily' : 'monthly',
-    priority: route === '' ? (route === '' ? 1 : 0.8) : 0.5,
+    priority: route === '' ?  1 : 0.8
   }))
 
   // Dynamic routes (Communities)
