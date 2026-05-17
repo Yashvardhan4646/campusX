@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef, memo, useCallback } from 'react'
+import { useState, useRef, memo, useCallback } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Heart, MessageCircle, Bookmark } from "lucide-react"
+import { MessageCircle, Bookmark } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
 import { toast } from "sonner"
 import dynamic from 'next/dynamic'
 import UserAvatar from "@/components/user/UserAvatar"
@@ -20,12 +19,8 @@ const CommentSection = dynamic(() => import('@/components/post/CommentSection'),
 const PollDisplay = dynamic(() => import('@/components/post/PollDisplay'), { ssr: false })
 const PostImageGrid = dynamic(() => import('@/components/post/PostImageGrid'), { ssr: false })
 
-import { formatRelativeTime } from "@/utils/formatters"
-import { formatCount } from "@/utils/formatters"
 import { cn } from "@/lib/utils"
 import useUser from "@/hooks/useUser"
-import { isFounder } from "@/lib/founder"
-import FounderBadges from "@/components/founder/FounderBadges"
 import FormattedTime from "@/components/shared/FormattedTime"
 import VerifiedBadge from '@/components/shared/VerifiedBadge'
 
