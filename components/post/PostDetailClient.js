@@ -207,7 +207,6 @@ export default function PostDetailClient({ postId }) {
     )
   }
 
-  const isPostFounder = post.author && isFounder(post.author.username)
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -231,7 +230,6 @@ export default function PostDetailClient({ postId }) {
               <Link href={`/profile/${post.author.username}`} className="hover:underline flex items-center gap-1">
                 <span className="font-bold text-lg text-foreground">{post.author.name}</span>
               </Link>
-              {isPostFounder && <FounderBadges size="sm" />}
             </div>
             <p className="text-sm text-muted-foreground">
               @{post.author.username} ·
