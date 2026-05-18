@@ -10,6 +10,11 @@ import {
 import { useCat } from "@/context/CatContext";
 import { cn } from "@/lib/utils";
 
+function emojiCursor(emoji, size = 32) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><text y="${size - 4}" font-size="${size - 4}">${emoji}</text></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 4 4, auto`;
+}
+
 const CATEGORIES = [
   {
     name: "Basic",
@@ -62,6 +67,23 @@ const CATEGORIES = [
       { id: "ns-resize", label: "NS" },
     ],
   },
+  {
+    name: "Emoji",
+    options: [
+      { id: "emoji-point-up", label: "👆", cursor: emojiCursor("👆") },
+      { id: "emoji-pointer", label: "🖱️", cursor: emojiCursor("🖱️") },
+      { id: "emoji-magnify", label: "🔍", cursor: emojiCursor("🔍") },
+      { id: "emoji-pencil", label: "✏️", cursor: emojiCursor("✏️") },
+      { id: "emoji-heart", label: "❤️", cursor: emojiCursor("❤️") },
+      { id: "emoji-star", label: "⭐", cursor: emojiCursor("⭐") },
+      { id: "emoji-fire", label: "🔥", cursor: emojiCursor("🔥") },
+      { id: "emoji-rocket", label: "🚀", cursor: emojiCursor("🚀") },
+      { id: "emoji-ghost", label: "👻", cursor: emojiCursor("👻") },
+      { id: "emoji-skull", label: "💀", cursor: emojiCursor("💀") },
+      { id: "emoji-diamond", label: "💎", cursor: emojiCursor("💎") },
+      { id: "emoji-bomb", label: "💣", cursor: emojiCursor("💣") },
+    ],
+  },
 ];
 
 export default function CursorSelector() {
@@ -82,11 +104,11 @@ export default function CursorSelector() {
               </p>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1.5">
                 {cat.options.map((opt) => {
-                  const selected = cursorStyle === opt.id;
+                  const selected = cursorStyle === (opt.cursor || opt.id);
                   return (
                     <button
                       key={opt.id}
-                      onClick={() => selectStyle(opt.id)}
+                      onClick={() => selectStyle(opt.cursor || opt.id)}
                       className={cn(
                         "flex flex-col items-center gap-1 p-2 rounded-xl border transition-all",
                         selected
