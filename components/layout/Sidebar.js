@@ -27,6 +27,7 @@ import {
     Trophy,
     Smartphone,
     Code,
+    MousePointer2,
 } from "lucide-react";
 import { useChatUnreadCount } from "@/hooks/useChatUnreadCount";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { isFounder } from "@/lib/founder";
 import { isAdmin } from "@/lib/admin";
 import config from "@/lib/config";
+import { useCat } from "@/context/CatContext";
 
 export default function Sidebar() {
     const pathname = usePathname();
