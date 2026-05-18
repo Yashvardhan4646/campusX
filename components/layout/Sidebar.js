@@ -50,6 +50,7 @@ export default function Sidebar() {
     const { unreadCount } = useNotifications();
     const chatUnread = useChatUnreadCount();
     const [pendingResources, setPendingResources] = useState(0);
+    const { cursorEnabled, handleToggleClick } = useCat();
 
     useEffect(() => {
         if (user && isAdmin(user)) {
@@ -359,6 +360,21 @@ export default function Sidebar() {
                             </span>
                         </Button>
                     </Link>
+                    <Button
+                        variant="ghost"
+                        onClick={handleToggleClick}
+                        className={cn(
+                            "w-full justify-start gap-3 h-9 px-2",
+                            cursorEnabled
+                                ? "text-purple-400 hover:text-purple-400 hover:bg-purple-400/10"
+                                : "text-muted-foreground hover:text-muted-foreground",
+                        )}
+                    >
+                        <MousePointer2 className="w-4.5 h-4.5 shrink-0" />
+                        <span className="hidden lg:block text-xs font-bold">
+                            {cursorEnabled ? "Custom Mouse: ON" : "Custom Mouse: OFF"}
+                        </span>
+                    </Button>
                     <div className="flex items-center gap-1.5">
                         <div className="shrink-0">
                             <NotificationBell currentUser={user} />
