@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
 
     // 2. Check current user is in members list
     const isMember = group.members.some(
-      m => m.userId._id.toString() === currentUser._id.toString()
+      m => m.userId && m.userId._id.toString() === currentUser._id.toString()
     )
     if (!isMember) {
       return NextResponse.json({ message: 'Not a member of this group' }, { status: 403 })
@@ -120,10 +120,14 @@ export async function PATCH(request, { params }) {
 
     await group.save()
 
-    // Trigger Pusher for group update
-    triggerPusher(`private-group-${groupId}`, 'group-updated', group).catch(err => console.error('Operation failed:', err))
+    const populatedGroup = await GroupChat.findById(groupId)
+      .populate('members.userId', 'name username avatar isVerified')
+      .lean()
 
-    return NextResponse.json(group)
+    // Trigger Pusher for group update
+    triggerPusher(`private-group-${groupId}`, 'group-updated', populatedGroup).catch(err => console.error('Operation failed:', err))
+
+    return NextResponse.json(populatedGroup)
 
   } catch (err) {
     console.error('[GroupDetail PATCH]', err.message)
