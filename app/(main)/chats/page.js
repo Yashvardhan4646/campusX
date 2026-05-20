@@ -10,6 +10,7 @@ import GroupChatItem from "@/components/chat/GroupChatItem"
 import CreateGroupModal from "@/components/chat/CreateGroupModal"
 import useUser from "@/hooks/useUser"
 import { Skeleton } from "@/components/ui/skeleton"
+import { isAdmin } from "@/lib/admin"
 
 export default function ChatsPage() {
   const [groups, setGroups] = useState([])
@@ -50,9 +51,11 @@ export default function ChatsPage() {
       <div className="sticky top-0 bg-background/80 backdrop-blur border-b z-10 px-4 py-3"> 
         <div className="flex items-center justify-between mb-3"> 
           <h1 className="text-xl font-bold">💬 Group Chats</h1> 
-          <Button size="sm" onClick={() => setCreateOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90"> 
-            <Plus className="w-4 h-4 mr-1" /> New Group 
-          </Button> 
+          {isAdmin(currentUser) && (
+            <Button size="sm" onClick={() => setCreateOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90"> 
+              <Plus className="w-4 h-4 mr-1" /> New Group 
+            </Button> 
+          )}
         </div> 
  
 
