@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, Info, Loader2, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Info, Loader2, ChevronUp, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import useUser from "@/hooks/useUser"
@@ -28,6 +28,7 @@ export default function ChatRoomPage({ params: paramsPromise }) {
   const [cursor, setCursor] = useState(null)
   const [typingUsers, setTypingUsers] = useState({})
   const [infoOpen, setInfoOpen] = useState(false)
+  const [replyingTo, setReplyingTo] = useState(null)
   
   const messagesContainerRef = useRef(null)
   const bottomRef = useRef(null)
@@ -191,6 +192,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
 
     const clientId = `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     
+    const replyTarget = replyingTo
+    setReplyingTo(null)
+
     // Optimistic message
     const optimisticMsg = {
       _id: clientId,
@@ -203,6 +207,12 @@ export default function ChatRoomPage({ params: paramsPromise }) {
         avatar: currentUser.avatar,
         username: currentUser.username
       },
+      replyTo: replyTarget ? {
+        _id: replyTarget._id,
+        content: replyTarget.content,
+        type: replyTarget.type,
+        sender: replyTarget.sender
+      } : null,
       createdAt: new Date().toISOString(),
       isOptimistic: true,
       reactions: []
@@ -217,7 +227,7 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       const res = await fetch(`/api/groups/${groupId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, type: 'text', clientId })
+        body: JSON.stringify({ content, type: 'text', clientId, replyTo: replyTarget?._id })
       })
       
       if (!res.ok) {
@@ -300,9 +310,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
               ? <Image 
                   src={group.avatar} 
                   alt={group.name} 
-                  fill 
-                  className="object-cover"
-                  sizes="36px"
+                  width={36}
+                  height={36}
+                  className="object-cover w-full h-full"
                 /> 
               : group?.name?.charAt(0)?.toUpperCase() 
             } 
@@ -355,6 +365,7 @@ export default function ChatRoomPage({ params: paramsPromise }) {
             currentUserId={currentUser?._id} 
             onDelete={handleDeleteMessage} 
             onReact={handleReact} 
+            onReply={setReplyingTo}
           /> 
         ))} 
  
@@ -366,7 +377,28 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       </div> 
  
       {/* ━━━ Message Input ━━━ */} 
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 bg-background border-t border-border">
+        {replyingTo && (
+          <div className="flex items-center justify-between px-4 py-2 bg-accent/30 border-b border-border/50 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex-1 min-w-0 border-l-2 border-primary pl-3 py-0.5">
+              <p className="text-xs font-bold text-primary truncate">
+                Reply to {replyingTo.sender?.name || 'User'}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {replyingTo.content || (replyingTo.type === 'image' ? '📷 Image' : 'Message')}
+              </p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setReplyingTo(null)}
+              className="h-6 w-6 rounded-full hover:bg-accent/80"
+            >
+              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            </Button>
+          </div>
+        )}
+
         <MessageInput 
           onSend={handleSend} 
           onTyping={handleTyping} 
@@ -379,7 +411,7 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       <GroupInfoSheet 
         group={group} 
         currentUserId={currentUser?._id} 
-        isAdmin={group?.members?.find(m => m.userId._id === currentUser?._id)?.role === 'admin'} 
+        isAdmin={group?.members?.find(m => (m.userId?._id || m.userId)?.toString() === currentUser?._id?.toString())?.role === 'admin'} 
         onUpdate={setGroup} 
         open={infoOpen} 
         onOpenChange={setInfoOpen} 
