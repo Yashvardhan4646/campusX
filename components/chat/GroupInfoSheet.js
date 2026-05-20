@@ -135,7 +135,7 @@ export default function GroupInfoSheet({ group, currentUserId, isAdmin, onUpdate
       if (res.ok) {
         toast.success("Member removed")
         // Refetch or update local state via parent
-        const updatedMembers = group.members.filter(m => m.userId._id !== userId)
+        const updatedMembers = group.members.filter(m => m.userId?._id !== userId)
         onUpdate({ ...group, members: updatedMembers })
       } else {
         const data = await res.json()
@@ -288,37 +288,46 @@ export default function GroupInfoSheet({ group, currentUserId, isAdmin, onUpdate
             </div> 
  
             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar"> 
-              {group?.members?.map(member => ( 
-                <div key={member.userId._id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/30 transition-colors"> 
-                  <UserAvatar user={member.userId} size="sm" /> 
-                  <div className="flex-1 min-w-0"> 
-                    <p className="text-sm font-semibold truncate flex items-center gap-1.5"> 
-                      {member.userId.name} 
-                      {member.userId._id === currentUserId && (
-                        <span className="text-[10px] text-muted-foreground">(You)</span>
+              {group?.members?.filter(m => m && m.userId).map((member, idx) => {
+                const user = typeof member.userId === 'object' ? member.userId : null;
+                const userIdStr = user?._id || member.userId?.toString();
+                const displayName = user?.name || user?.username || (typeof member.userId === 'string' ? 'Loading member...' : 'Deleted User');
+                const displayUsername = user?.username ? `@${user.username}` : '';
+                
+                return (
+                  <div key={userIdStr || idx} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/30 transition-colors"> 
+                    <UserAvatar user={user} size="sm" /> 
+                    <div className="flex-1 min-w-0"> 
+                      <p className="text-sm font-semibold truncate flex items-center gap-1.5"> 
+                        {displayName} 
+                        {userIdStr === currentUserId && (
+                          <span className="text-[10px] text-muted-foreground">(You)</span>
+                        )}
+                      </p> 
+                      {displayUsername && (
+                        <p className="text-xs text-muted-foreground truncate">{displayUsername}</p> 
                       )}
-                    </p> 
-                    <p className="text-xs text-muted-foreground truncate">@{member.userId.username}</p> 
+                    </div> 
+                    
+                    {member.role === 'admin' && ( 
+                      <Badge className="text-[9px] bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 px-1.5 h-4 font-bold"> 
+                        <ShieldCheck className="w-2.5 h-2.5 mr-0.5" /> ADMIN 
+                      </Badge> 
+                    )} 
+   
+                    {/* Remove button — admin only, can't remove self */} 
+                    {isAdmin && userIdStr !== currentUserId && ( 
+                      <button  
+                        onClick={() => handleRemoveMember(userIdStr)}  
+                        disabled={removingId === userIdStr}
+                        className="text-muted-foreground hover:text-destructive p-1 rounded-full hover:bg-destructive/10 transition-colors" 
+                      > 
+                        {removingId === userIdStr ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserMinus className="w-3.5 h-3.5" />} 
+                      </button> 
+                    )} 
                   </div> 
-                  
-                  {member.role === 'admin' && ( 
-                    <Badge className="text-[9px] bg-primary/10 text-primary hover:bg-primary/10 border-primary/20 px-1.5 h-4 font-bold"> 
-                      <ShieldCheck className="w-2.5 h-2.5 mr-0.5" /> ADMIN 
-                    </Badge> 
-                  )} 
- 
-                  {/* Remove button — admin only, can't remove self */} 
-                  {isAdmin && member.userId._id !== currentUserId && ( 
-                    <button  
-                      onClick={() => handleRemoveMember(member.userId._id)}  
-                      disabled={removingId === member.userId._id}
-                      className="text-muted-foreground hover:text-destructive p-1 rounded-full hover:bg-destructive/10 transition-colors" 
-                    > 
-                      {removingId === member.userId._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserMinus className="w-3.5 h-3.5" />} 
-                    </button> 
-                  )} 
-                </div> 
-              ))} 
+                );
+              })} 
             </div> 
           </div> 
  
@@ -378,7 +387,7 @@ export default function GroupInfoSheet({ group, currentUserId, isAdmin, onUpdate
               </div>
             ) : searchResults.length > 0 ? (
               searchResults.map(user => {
-                const isMember = group?.members?.some(m => m.userId._id === user._id)
+                const isMember = group?.members?.some(m => m.userId?._id === user._id)
                 return (
                   <div key={user._id} className="flex items-center justify-between p-2 rounded-xl hover:bg-accent/50 transition-colors">
                     <div className="flex items-center gap-3">
