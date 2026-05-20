@@ -2,6 +2,7 @@
  
 import { useState, useEffect, useRef, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import Image from 'next/image'
 import { ArrowLeft, Info, Loader2, ChevronUp, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,13 @@ export default function ChatRoomPage({ params: paramsPromise }) {
   
   const messagesContainerRef = useRef(null)
   const bottomRef = useRef(null)
+
+  const messagesVirtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => messagesContainerRef.current,
+    estimateSize: () => 70,
+    overscan: 10,
+  })
 
   // ━━━ Fetching ━━━
   const fetchInitialData = useCallback(async () => {
@@ -98,6 +106,16 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       setLoadingOlder(false)
     }
   }
+
+  const scrollToBottom = useCallback(() => { 
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) 
+  }, [])
+
+  const isNearBottom = useCallback(() => { 
+    const container = messagesContainerRef.current 
+    if (!container) return true 
+    return container.scrollHeight - container.scrollTop - container.clientHeight < 150 
+  }, [])
 
   // ━━━ Real-time Handlers ━━━
   const onNewMessage = useCallback((message) => {
@@ -187,8 +205,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
   })
 
   // ━━━ Actions ━━━
-  const handleSend = async (content) => {
-    if (!content.trim()) return
+  const handleSend = useCallback(async (content, type = 'text', imageUrl = '') => {
+    if (type === 'text' && !content.trim()) return
+    if (type === 'image' && !imageUrl) return
 
     const clientId = `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     
@@ -199,8 +218,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
     const optimisticMsg = {
       _id: clientId,
       clientId,
-      content,
-      type: 'text',
+      content: type === 'text' ? content : '',
+      type,
+      imageUrl: type === 'image' ? imageUrl : '',
       sender: {
         _id: currentUser._id,
         name: currentUser.name,
@@ -227,7 +247,7 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       const res = await fetch(`/api/groups/${groupId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, type: 'text', clientId, replyTo: replyTarget?._id })
+        body: JSON.stringify({ content, type, imageUrl, clientId, replyTo: replyTarget?._id })
       })
       
       if (!res.ok) {
@@ -240,17 +260,17 @@ export default function ChatRoomPage({ params: paramsPromise }) {
       toast.error("Network error")
       setMessages(prev => prev.filter(m => m.clientId !== clientId))
     }
-  }
+  }, [replyingTo, currentUser, groupId, scrollToBottom])
 
-  const handleTyping = (isTyping) => {
+  const handleTyping = useCallback((isTyping) => {
     fetch(`/api/groups/${groupId}/typing`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isTyping })
     }).catch(() => {})
-  }
+  }, [groupId])
 
-  const handleDeleteMessage = async (messageId) => {
+  const handleDeleteMessage = useCallback(async (messageId) => {
     try {
       const res = await fetch(`/api/groups/${groupId}/messages/${messageId}`, {
         method: 'DELETE'
@@ -259,9 +279,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
     } catch (error) {
       toast.error("Error deleting message")
     }
-  }
+  }, [groupId])
 
-  const handleReact = async (messageId, emoji) => {
+  const handleReact = useCallback(async (messageId, emoji) => {
     try {
       const res = await fetch(`/api/groups/${groupId}/messages/${messageId}/react`, {
         method: 'POST',
@@ -272,18 +292,9 @@ export default function ChatRoomPage({ params: paramsPromise }) {
     } catch (error) {
       toast.error("Error reacting")
     }
-  }
+  }, [groupId])
 
-  // ━━━ Helpers ━━━
-  const scrollToBottom = () => { 
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) 
-  }
 
-  const isNearBottom = () => { 
-    const container = messagesContainerRef.current 
-    if (!container) return true 
-    return container.scrollHeight - container.scrollTop - container.clientHeight < 150 
-  }
 
   if (loading) {
     return (
@@ -354,20 +365,45 @@ export default function ChatRoomPage({ params: paramsPromise }) {
           </div> 
         )} 
  
-        {messages.map((message, i) => ( 
-          <MessageBubble 
-            key={message._id} 
-            message={message} 
-            isOwn={message.sender?._id === currentUser?._id} 
-            showAvatar={ 
-              i === 0 || messages[i-1]?.sender?._id !== message.sender?._id 
-            } 
-            currentUserId={currentUser?._id} 
-            onDelete={handleDeleteMessage} 
-            onReact={handleReact} 
-            onReply={setReplyingTo}
-          /> 
-        ))} 
+        <div
+          style={{
+            height: `${messagesVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {messagesVirtualizer.getVirtualItems().map((virtualRow) => {
+            const message = messages[virtualRow.index]
+            if (!message) return null
+            const i = virtualRow.index
+            return (
+              <div
+                key={message._id}
+                ref={messagesVirtualizer.measureElement}
+                data-index={virtualRow.index}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <MessageBubble 
+                  message={message} 
+                  isOwn={message.sender?._id === currentUser?._id} 
+                  showAvatar={ 
+                    i === 0 || messages[i-1]?.sender?._id !== message.sender?._id 
+                  } 
+                  currentUserId={currentUser?._id} 
+                  onDelete={handleDeleteMessage} 
+                  onReact={handleReact} 
+                  onReply={setReplyingTo}
+                /> 
+              </div>
+            )
+          })}
+        </div> 
  
         {Object.keys(typingUsers).length > 0 && ( 
           <TypingIndicator users={Object.values(typingUsers)} /> 
