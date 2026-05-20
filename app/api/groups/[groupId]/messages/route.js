@@ -46,6 +46,10 @@ export async function GET(request, { params }) {
       .sort({ _id: -1 })
       .limit(limit + 1)
       .populate('sender', 'name username avatar isVerified')
+      .populate({
+        path: 'replyTo',
+        populate: { path: 'sender', select: 'name username' }
+      })
       .lean()
 
     // 4. Pagination logic
@@ -113,7 +117,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ message: 'Invalid request body' }, { status: 400 })
     }
 
-    const { content, type, imageUrl, clientId } = sanitizeMongoInput(body)
+    const { content, type, imageUrl, clientId, replyTo } = sanitizeMongoInput(body)
 
     // 3. Validate content/type
     if (!['text', 'image'].includes(type)) {
@@ -139,11 +143,22 @@ export async function POST(request, { params }) {
       sender: currentUser._id,
       content: type === 'text' ? sanitizeText(content) : '',
       type,
-      imageUrl: type === 'image' ? imageUrl : ''
+      imageUrl: type === 'image' ? imageUrl : '',
+      replyTo: replyTo && validateObjectId(replyTo) ? replyTo : null
     })
 
+    // Fetch original message if this is a reply, to populate it
+    let populatedReplyTo = null
+    if (message.replyTo) {
+      const origMsg = await GroupMessage.findById(message.replyTo)
+        .populate('sender', 'name username')
+        .lean()
+      if (origMsg) {
+        populatedReplyTo = origMsg
+      }
+    }
+
     // 5. Construct populated message for immediate return & Pusher
-    // We already have currentUser info, so we can avoid an extra findById + populate
     const populated = {
       ...message.toObject(),
       sender: {
@@ -152,7 +167,8 @@ export async function POST(request, { params }) {
         username: currentUser.username,
         avatar: currentUser.avatar,
         isVerified: currentUser.isVerified || false
-      }
+      },
+      replyTo: populatedReplyTo
     }
 
     // 5.5 Update group's lastMessage (fire and forget)
