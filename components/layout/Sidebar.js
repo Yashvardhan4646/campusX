@@ -57,7 +57,7 @@ export default function Sidebar() {
             fetch("/api/admin/resources?status=pending")
                 .then((res) => res.json())
                 .then((data) => setPendingResources(data.total || 0))
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [user]);
 
@@ -371,9 +371,9 @@ export default function Sidebar() {
                         )}
                     >
                         <MousePointer2 className="w-4.5 h-4.5 shrink-0" />
-                        <span className="hidden lg:block text-xs font-bold">
+                        {/* <span className="hidden lg:block text-xs font-bold">
                             {cursorEnabled ? "Custom Mouse: ON" : "Custom Mouse: OFF"}
-                        </span>
+                        </span> */}
                     </Button>
                     <div className="flex items-center gap-1.5">
                         <div className="shrink-0">
