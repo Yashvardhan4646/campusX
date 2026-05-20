@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getClientIP } from './lib/rate-limit';
+import IPBan from '@/models/IPBan';
 
 const protectedRoutes = ['/feed', '/communities', '/resources', '/profile', '/settings', '/community', '/bookmarks', '/wallet', '/shop'];
 
