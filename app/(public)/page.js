@@ -44,17 +44,20 @@ export const metadata = {
 async function getLandingStats() {
   try {
     await connectDB();
+    
+    // Using estimatedDocumentCount() is much faster than countDocuments() for large collections
+    // as it uses collection metadata instead of scanning documents.
     const [users, posts, resources] = await Promise.all([
-      User.countDocuments().lean(),
-      Post.countDocuments().lean(),
-      Resource.countDocuments({ status: 'approved' }).lean()
+      User.estimatedDocumentCount(),
+      Post.estimatedDocumentCount(),
+      Resource.countDocuments({ status: 'approved' }) // countDocuments is still needed here due to filter
     ]);
 
     return {
       users: users || 0,
       posts: posts || 0,
       resources: resources || 0,
-      codeAreas: 0 // StudyRoom model not available
+      codeAreas: 0
     };
   } catch (error) {
     console.error('[Landing Stats Fetch Error]:', error);
