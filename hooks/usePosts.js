@@ -31,7 +31,7 @@ export function usePosts(queryParams = {}, initialPosts = []) {
     try {
       const params = new URLSearchParams({
         page: pageNum,
-        limit: 5,
+        limit: 15, // Increased from 5 to 15 to reduce API request frequency
         ...queryParams
       })
 
