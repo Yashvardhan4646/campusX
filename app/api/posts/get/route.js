@@ -75,33 +75,45 @@ export async function GET(request) {
     let posts;
     let total;
 
-    // Personalized/Randomized Feed Logic
+    // Optimized Personalized/Randomized Feed Logic
     if (!community && !username && page === 1) {
-      // 1. Get latest 15 posts
-      const latestPosts = await Post.find(query)
-        .sort({ createdAt: -1 })
-        .limit(15)
-        .populate('author', 'name username avatar college')
-        .lean();
-
-      // 2. Get 15 random older posts (excluding the latest ones)
-      const latestIds = latestPosts.map(p => p._id);
-      const olderPosts = await Post.aggregate([
-        { $match: { ...query, _id: { $nin: latestIds } } },
-        { $sample: { size: 15 } },
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $unwind: '$author' },
-        { $project: { 'author.password': 0, 'author.email': 0 } }
+      // Fetch latest and total in parallel
+      const [latestPosts, totalCount] = await Promise.all([
+        Post.find(query)
+          .sort({ createdAt: -1 })
+          .limit(15)
+          .populate('author', 'name username avatar college')
+          .lean(),
+        Post.estimatedDocumentCount() // Faster for global feed
       ]);
 
-      // 3. Merge and Shuffle
-      posts = [...latestPosts, ...olderPosts]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, limit);
-      
-      total = await Post.countDocuments(query);
+      posts = latestPosts;
+      total = totalCount;
+
+      // Only get random posts if we have enough
+      if (latestPosts.length > 0) {
+        const latestIds = latestPosts.map(p => p._id);
+        
+        // Get 15 random older posts efficiently
+        const olderPosts = await Post.aggregate([
+          { $match: { ...query, _id: { $nin: latestIds } } },
+          { $limit: 100 }, // Narrow down before sampling for speed
+          { $sample: { size: 10 } },
+          { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
+          { $unwind: '$author' },
+          { $project: { 'author.password': 0, 'author.email': 0 } }
+        ]);
+
+        posts = [...latestPosts, ...olderPosts]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, limit);
+      }
     } else {
       // Regular paginated/filtered feed
+      const countPromise = community || username 
+        ? Post.countDocuments(query) 
+        : Post.estimatedDocumentCount();
+
       [posts, total] = await Promise.all([
         Post.find(query)
           .sort({ createdAt: -1 })
@@ -109,7 +121,7 @@ export async function GET(request) {
           .limit(limit)
           .populate('author', 'name username avatar college')
           .lean(),
-        Post.countDocuments(query),
+        countPromise,
       ]);
     }
 
