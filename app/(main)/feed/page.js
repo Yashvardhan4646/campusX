@@ -44,11 +44,29 @@ export default function FeedPage() {
     addPost,
     removePost,
     updatePostLike,
-    refresh: refreshPosts
+    refresh: refreshPosts,
+    prefetchNextPage
   } = usePosts(selectedCommunity ? { community: selectedCommunity } : {})
 
   const parentRef = useRef(null)
   const [scrollMargin, setScrollMargin] = useState(0)
+
+  // Trigger prefetch when user is near bottom
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight
+      const scrollTop = document.documentElement.scrollTop
+      const clientHeight = document.documentElement.clientHeight
+      
+      // Prefetch when user is 80% down the page
+      if ((scrollTop + clientHeight) / scrollHeight > 0.8) {
+        prefetchNextPage()
+      }
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [prefetchNextPage])
 
   useEffect(() => {
     if (parentRef.current) {
