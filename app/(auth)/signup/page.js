@@ -18,18 +18,81 @@ export default function SignupPage() {
     username: '',
     email: '',
     password: '',
+    confirmPassword: '',
+    phone: '',
     college: '',
     course: '',
     year: '1',
     gender: '',
   });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const validateField = (name, value) => {
+    let error = '';
+    switch (name) {
+      case 'name':
+        if (!value) error = 'Full name is required';
+        else if (value.length < 2) error = 'Name must be at least 2 characters';
+        break;
+      case 'username':
+        if (!value) error = 'Username is required';
+        else if (!/^[a-zA-Z0-9_]{3,20}$/.test(value)) error = '3-20 characters, alphanumeric and underscores only';
+        break;
+      case 'email':
+        if (!value) error = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format';
+        else {
+          const localPart = value.split('@')[0];
+          if (localPart.length < 4) {
+            error = 'Email prefix must be at least 4 characters';
+          } else {
+            const disposableDomains = ['yopmail.com', 'temp-mail.org', 'guerrillamail.com', '10minutemail.com', 'mailinator.com', 'dispostable.com', 'getnada.com', 'tempmail.com'];
+            const domain = value.split('@')[1];
+            if (disposableDomains.includes(domain)) error = 'Disposable emails are not allowed';
+          }
+        }
+        break;
+      case 'password':
+        if (!value) error = 'Password is required';
+        else if (value.length < 8) error = 'Minimum 8 characters';
+        else if (!/[a-z]/.test(value)) error = 'Must contain a lowercase letter';
+        else if (!/[A-Z]/.test(value)) error = 'Must contain an uppercase letter';
+        else if (!/[0-9]/.test(value)) error = 'Must contain a number';
+        else if (!/[^a-zA-Z0-9]/.test(value)) error = 'Must contain a special character';
+        break;
+      case 'confirmPassword':
+        if (!value) error = 'Please confirm your password';
+        else if (value !== formData.password) error = 'Passwords do not match';
+        break;
+      case 'phone':
+        if (value && !/^\+?[1-9]\d{1,14}$/.test(value)) error = 'Invalid phone number format';
+        break;
+      case 'gender':
+        if (!value) error = 'Please select your gender';
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (touched[name]) {
+      setErrors({ ...errors, [name]: validateField(name, value) });
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched({ ...touched, [name]: true });
+    setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
   const handleYearChange = (value) => {
@@ -38,10 +101,27 @@ export default function SignupPage() {
 
   const handleGenderChange = (value) => {
     setFormData({ ...formData, gender: value });
+    setTouched({ ...touched, gender: true });
+    setErrors({ ...errors, gender: validateField('gender', value) });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+      setError('Please fix the errors in the form before submitting.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -133,20 +213,114 @@ export default function SignupPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+                    <Input 
+                      id="name" 
+                      name="name" 
+                      value={formData.name} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.name && errors.name ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.name && errors.name)}
+                      aria-describedby={touched.name && errors.name ? 'name-error' : undefined}
+                      required 
+                    />
+                    {touched.name && errors.name && (
+                      <p id="name-error" className="text-xs text-destructive mt-1">{errors.name}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="username">Username</Label>
-                    <Input id="username" name="username" value={formData.username} onChange={handleChange} required />
+                    <Input 
+                      id="username" 
+                      name="username" 
+                      value={formData.username} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.username && errors.username ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.username && errors.username)}
+                      aria-describedby={touched.username && errors.username ? 'username-error' : undefined}
+                      required 
+                    />
+                    {touched.username && errors.username && (
+                      <p id="username-error" className="text-xs text-destructive mt-1">{errors.username}</p>
+                    )}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      name="email" 
+                      type="email" 
+                      value={formData.email} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.email && errors.email ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.email && errors.email)}
+                      aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
+                      required 
+                    />
+                    {touched.email && errors.email && (
+                      <p id="email-error" className="text-xs text-destructive mt-1">{errors.email}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number (Optional)</Label>
+                    <Input 
+                      id="phone" 
+                      name="phone" 
+                      type="tel"
+                      value={formData.phone} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      placeholder="+1234567890"
+                      className={touched.phone && errors.phone ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.phone && errors.phone)}
+                      aria-describedby={touched.phone && errors.phone ? 'phone-error' : undefined}
+                    />
+                    {touched.phone && errors.phone && (
+                      <p id="phone-error" className="text-xs text-destructive mt-1">{errors.phone}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} required />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password" 
+                      name="password" 
+                      type="password" 
+                      value={formData.password} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.password && errors.password ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.password && errors.password)}
+                      aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
+                      required 
+                    />
+                    {touched.password && errors.password && (
+                      <p id="password-error" className="text-xs text-destructive mt-1">{errors.password}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      name="confirmPassword" 
+                      type="password" 
+                      value={formData.confirmPassword} 
+                      onChange={handleChange} 
+                      onBlur={handleBlur}
+                      className={touched.confirmPassword && errors.confirmPassword ? 'border-destructive' : ''}
+                      aria-invalid={!!(touched.confirmPassword && errors.confirmPassword)}
+                      aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirmPassword-error' : undefined}
+                      required 
+                    />
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <p id="confirmPassword-error" className="text-xs text-destructive mt-1">{errors.confirmPassword}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -162,7 +336,7 @@ export default function SignupPage() {
                   <div className="space-y-2">
                     <Label htmlFor="gender">I am a...</Label>
                     <Select onValueChange={handleGenderChange} value={formData.gender}>
-                      <SelectTrigger className="h-10">
+                      <SelectTrigger className={`h-10 ${touched.gender && errors.gender ? 'border-destructive' : ''}`}>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -171,6 +345,9 @@ export default function SignupPage() {
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
+                    {touched.gender && errors.gender && (
+                      <p className="text-xs text-destructive mt-1">{errors.gender}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="year">Year of Study</Label>
@@ -184,7 +361,9 @@ export default function SignupPage() {
                         <SelectItem value="3">3rd Year</SelectItem>
                         <SelectItem value="4">4th Year</SelectItem>
                         <SelectItem value="5">5th Year</SelectItem>
-                        <SelectItem value="6">Postgraduate/Other</SelectItem>
+                        <SelectItem value="6">Postgraduate/Graduate</SelectItem>
+                        <SelectItem value="7">Student/Researcher</SelectItem>
+                        <SelectItem value="8">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
