@@ -115,6 +115,8 @@ postSchema.index({ content: 'text' });
 postSchema.index({ reportCount: -1, isDeleted: 1 });
 postSchema.index({ isFeatured: 1, createdAt: -1 });
 postSchema.index({ isDeleted: 1, createdAt: -1 });
+postSchema.index({ isDeleted: 1, _id: -1 });
+postSchema.index({ community: 1, _id: -1 });
 
 postSchema.virtual('hasPoll').get(function () {
   return this.poll?.options?.length > 0;
