@@ -66,6 +66,15 @@ Welcome to the **CampusX** codebase report. This document provides a comprehensi
 - **Roadmap**: A public roadmap showing 'Done', 'In Progress', and 'Upcoming' features.
 - **Profile Analytics**: Track profile views and user growth metrics.
 
+### 7. **Robust Validation & Security**
+
+- **Multi-Layered Validation**: Real-time client-side validation with immediate feedback and server-side Zod failsafe.
+- **Password Strength**: Enforced requirements (8+ chars, uppercase, lowercase, numbers, special characters).
+- **Spam Protection**: Blocking of disposable email domains (e.g., yopmail) and RFC-compliant email regex.
+- **Brute-Force Protection**: Rate limiting on login attempts by both IP and email (5 attempts/15 mins).
+- **Privacy-First Messaging**: Generic "Invalid credentials" errors to prevent account enumeration.
+- **Accessibility**: WCAG 2.1 compliant forms with `aria` attributes and screen-reader support.
+
 ***
 
 ## 📂 Project Structure
