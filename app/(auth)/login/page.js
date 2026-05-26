@@ -18,13 +18,52 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'email') {
+      if (!value) error = 'Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = 'Invalid email format';
+      else if (value.split('@')[0].length < 4) error = 'Email prefix must be at least 4 characters';
+    } else if (name === 'password') {
+      if (!value) error = 'Password is required';
+    }
+    return error;
+  };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (touched[name]) {
+      setErrors({ ...errors, [name]: validateField(name, value) });
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched({ ...touched, [name]: true });
+    setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setTouched({ email: true, password: true });
+      setError('Please fill in all required fields.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -75,8 +114,15 @@ export default function LoginPage() {
                   type="email" 
                   value={formData.email} 
                   onChange={handleChange} 
+                  onBlur={handleBlur}
+                  className={touched.email && errors.email ? 'border-destructive' : ''}
+                  aria-invalid={!!(touched.email && errors.email)}
+                  aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
                   required 
                 />
+                {touched.email && errors.email && (
+                  <p id="email-error" className="text-xs text-destructive mt-1">{errors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -88,8 +134,15 @@ export default function LoginPage() {
                   type="password" 
                   value={formData.password} 
                   onChange={handleChange} 
+                  onBlur={handleBlur}
+                  className={touched.password && errors.password ? 'border-destructive' : ''}
+                  aria-invalid={!!(touched.password && errors.password)}
+                  aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
                   required 
                 />
+                {touched.password && errors.password && (
+                  <p id="password-error" className="text-xs text-destructive mt-1">{errors.password}</p>
+                )}
               </div>
               
               {error && (
