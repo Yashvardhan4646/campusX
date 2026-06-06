@@ -45,7 +45,7 @@ export default function Logo({
       >
         {/* Modern Abstract Logo Shape */}
         <div className="absolute inset-0 bg-primary/20 rounded-xl blur-lg group-hover:bg-primary/40 transition-all duration-500" />
-        <div className="relative w-full h-full bg-gradient-to-br from-primary to-brand rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
+        <div className="relative w-full h-full bg-linear-to-br from-primary to-brand rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.4),transparent_50%)]" />
           <span className="text-white font-black italic tracking-tighter select-none">CZ</span>
         </div>
