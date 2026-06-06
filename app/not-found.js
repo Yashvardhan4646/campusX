@@ -6,30 +6,13 @@ import Logo from "@/components/shared/Logo";
 export default function NotFound() {
     return (
         <div className="flex flex-col min-h-screen bg-[#0f0f0f] text-[#f0f0f0] overflow-hidden relative">
-            {/* Branding Header */}
             <header className="absolute top-0 w-full p-6 flex justify-center z-20">
                 <Logo size="lg" />
             </header>
-
-            {/* Animated Background Content */}
-            <div className="absolute inset-0 z-0">
-                {/* Subtle mesh gradients */}
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-pulse delay-700" />
-
-                {/* Drifting circles (CSS only) */}
-                <div className="absolute top-[10%] left-[15%] w-2 h-2 bg-white/20 rounded-full animate-float" />
-                <div className="absolute top-[80%] left-[80%] w-3 h-3 bg-white/10 rounded-full animate-float-delayed" />
-                <div className="absolute top-[50%] left-[5%] w-1.5 h-1.5 bg-white/20 rounded-full animate-float-reverse" />
-            </div>
-
             <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10">
-                {/* 404 Text with Gradient */}
                 <div className="relative mb-8">
                     <h1
-                        className="text-9xl md:text-[12rem] font-black tracking-tighter select-none leading-none
-                          bg-linear-to-br from-[#6c3bff] via-campus-blue to-[#8b5cf6] 
-                          bg-clip-text text-transparent drop-shadow-2xl"
+                        className="text-9xl md:text-[12rem] font-black tracking-tighter select-none leading-none drop-shadow-2xl"
                     >
                         404
                     </h1>
@@ -49,7 +32,7 @@ export default function NotFound() {
                     <Button
                         asChild
                         size="lg"
-                        className="rounded-full bg-primary hover:bg-primary/90 text-white font-bold h-14 px-8 shadow-xl shadow-primary/20"
+                        className="rounded-full bg-primary hover:bg-primary/90 text-white font-bold h-14 px-8"
                     >
                         <Link href="/feed">Go to Feed</Link>
                     </Button>
