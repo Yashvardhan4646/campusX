@@ -1,0 +1,19 @@
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    display: flex;
+    width: fit-content;
+    animation: marquee 30s linear infinite;
+}
+
+.font-bricolage {
+    font-family: "Bricolage Grotesque", sans-serif;
+}
