@@ -1,14 +1,14 @@
 "use client";
 
 import { HeroSection } from "@/components/ui/hero-section";
-import { ArrowRight, Smartphone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import RotatingText from "@/components/ui/RotatingText";
 
 export function HeroSectionDemo() {
     return (
         <HeroSection
             badge={{
-                text: `बलिदान परम धर्म: 🇮🇳`,
+                text: `Made in India: 🇮🇳`,
             }}
             titleRotatingText={{
                 prefix: "Own Your",
