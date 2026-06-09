@@ -35,13 +35,8 @@ const nextConfig = {
       },
     ],
   },
-  async headers() { 
-    return [ 
-      // Static assets — cache aggressively
-      {
-        source: '/_next/static/(.*)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
-      },
+  async headers() {
+    return [
       // Images — cache for 1 day
       {
         source: '/images/(.*)',
@@ -52,43 +47,43 @@ const nextConfig = {
         source: '/api/(.*)',
         headers: [{ key: 'Cache-Control', value: 'no-store' }]
       },
-      { 
-        source: '/(.*)', 
-        headers: [ 
+      {
+        source: '/(.*)',
+        headers: [
           // Prevent clickjacking 
-          { key: 'X-Frame-Options', value: 'DENY' }, 
+          { key: 'X-Frame-Options', value: 'DENY' },
           // Prevent MIME sniffing 
-          { key: 'X-Content-Type-Options', value: 'nosniff' }, 
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
           // Force HTTPS 
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }, 
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           // Prevent XSS 
-          { key: 'X-XSS-Protection', value: '1; mode=block' }, 
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
           // Control referrer info 
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }, 
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           // Permissions policy 
-          { 
-            key: 'Permissions-Policy', 
-            value: 'camera=(), microphone=(), geolocation=()' 
-          }, 
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          },
           // Content Security Policy 
-          { 
-            key: 'Content-Security-Policy', 
-            value: [ 
-              "default-src 'self'", 
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com",  // Next.js needs unsafe-eval, Monaco, tldraw
-              "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob:", 
+              "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob:",
               "img-src 'self' data: https: http: blob: https://utfs.io https://*.uploadthing.com https://*.ufs.sh https://*.tldraw.com",  // allow all external images
-              "connect-src 'self' https://api.anthropic.com wss://*.pusher.com https://*.pusher.com https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://*.uploadthing.com https://*.ingest.uploadthing.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob: data: *", 
-              "font-src 'self' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com data:", 
-              "frame-src 'self' https://www.youtube.com https://*.tldraw.com", 
-              "worker-src 'self' blob: https://*.tldraw.com", 
-              "child-src 'self' blob:", 
-            ].join('; ') 
-          } 
-        ] 
-      } 
-    ] 
-  } 
+              "connect-src 'self' https://api.anthropic.com wss://*.pusher.com https://*.pusher.com https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com https://*.uploadthing.com https://*.ingest.uploadthing.com https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com blob: data: *",
+              "font-src 'self' https://cdn.jsdelivr.net https://cdn.tldraw.com https://*.tldraw.com data:",
+              "frame-src 'self' https://www.youtube.com https://*.tldraw.com",
+              "worker-src 'self' blob: https://*.tldraw.com",
+              "child-src 'self' blob:",
+            ].join('; ')
+          }
+        ]
+      }
+    ]
+  }
 };
 
 export default withBundleAnalyzer({
