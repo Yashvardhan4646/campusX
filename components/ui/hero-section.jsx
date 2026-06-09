@@ -3,11 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRightIcon } from "lucide-react";
-import { Mockup, MockupFrame } from "@/components/ui/mockup";
-import { Glow } from "@/components/ui/glow";
-import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,7 +40,7 @@ export function HeroSection({
     return (
         <section
             className={cn(
-                "relative min-h-screen flex items-center justify-center overflow-hidden",
+                "relative isolate min-h-screen flex items-center justify-center overflow-hidden",
                 "bg-[#050505]",
                 "py-12 sm:py-24 md:py-32 px-4",
             )}
