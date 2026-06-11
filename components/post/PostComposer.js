@@ -37,7 +37,7 @@ function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
     const radius = 12;
     const circumference = 2 * Math.PI * radius;
     const progress = Math.min(length / maxLength, 1);
-    const strokeDashoffset = circumference - (progress * circumference);
+    const strokeDashoffset = circumference - progress * circumference;
     const remaining = Math.max(maxLength - length, 0);
     const showNumber = remaining <= 200;
 
@@ -51,10 +51,7 @@ function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
 
     return (
         <div className="relative w-8 h-8 flex items-center justify-center">
-            <svg
-                className="transform -rotate-90 w-8 h-8"
-                viewBox="0 0 32 32"
-            >
+            <svg className="transform -rotate-90 w-8 h-8" viewBox="0 0 32 32">
                 {/* Background ring */}
                 <circle
                     cx="16"
@@ -81,9 +78,13 @@ function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
             </svg>
             {/* Number in center */}
             <span
-                className={`absolute text-[10px] font-bold tabular-nums ${length > maxLength ? "text-red-500" :
-                    remaining <= 200 ? "text-foreground" : "text-muted-foreground"
-                    }`}
+                className={`absolute text-[10px] font-bold tabular-nums ${
+                    length > maxLength
+                        ? "text-red-500"
+                        : remaining <= 200
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                }`}
             >
                 {showNumber ? remaining : ""}
             </span>
@@ -107,20 +108,25 @@ export default function PostComposer({
     useEffect(() => {
         const fetchCommunities = async () => {
             try {
-                const res = await fetch('/api/communities')
+                const res = await fetch("/api/communities");
                 if (res.ok) {
-                    const data = await res.json()
-                    setCommunities(data)
+                    const data = await res.json();
+                    setCommunities(data);
                 }
             } catch (error) {
-                console.error('Failed to fetch communities:', error)
+                console.error("Failed to fetch communities:", error);
             }
-        }
-        fetchCommunities()
-    }, [])
+        };
+        fetchCommunities();
+    }, []);
 
-    const activeCommunity = communities.find(c => c.slug === (defaultCommunity || manualCommunity)) ||
-        communities.find(c => c.name === (defaultCommunity || manualCommunity));
+    const activeCommunity =
+        communities.find(
+            (c) => c.slug === (defaultCommunity || manualCommunity),
+        ) ||
+        communities.find(
+            (c) => c.name === (defaultCommunity || manualCommunity),
+        );
 
     // Markdown state
     const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
@@ -153,6 +159,7 @@ export default function PostComposer({
         }
 
         if (url) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setLinkPreview({ url });
         } else {
             setLinkPreview(null);
@@ -193,7 +200,7 @@ export default function PostComposer({
         // Store GIF metadata for content block.
         // We use the Giphy CDN url directly instead of re-uploading.
         const gifBlock = {
-            type: 'gif',
+            type: "gif",
             content: gif.url,
             metadata: {
                 title: gif.title,
@@ -202,23 +209,23 @@ export default function PostComposer({
                 aspectRatio: `${gif.width}/${gif.height}`,
                 previewUrl: gif.previewUrl,
                 id: gif.id,
-                isUploading: false
-            }
+                isUploading: false,
+            },
         };
-        setContentBlocks(prev => [...prev, gifBlock]);
-        setSelectedGIFs(prev => [...prev, gif]);
+        setContentBlocks((prev) => [...prev, gifBlock]);
+        setSelectedGIFs((prev) => [...prev, gif]);
     };
 
     // Remove GIF from content blocks
     const removeGif = (index) => {
-        setContentBlocks(prev => prev.filter((_, i) => i !== index));
-        setSelectedGIFs(prev => prev.filter((_, i) => i !== index));
+        setContentBlocks((prev) => prev.filter((_, i) => i !== index));
+        setSelectedGIFs((prev) => prev.filter((_, i) => i !== index));
     };
 
     // Add emoji to content
     const addEmoji = (emoji) => {
         // Add emoji as text content
-        setContent(prev => prev + emoji);
+        setContent((prev) => prev + emoji);
     };
 
     // Handle markdown file import
@@ -276,7 +283,6 @@ export default function PostComposer({
 
                 // Get all uploaded image URLs
                 uploadedImageUrls = results.map((r) => r.url);
-
             } catch (err) {
                 toast.error("Image upload failed", {
                     description:
@@ -298,7 +304,8 @@ export default function PostComposer({
             images: uploadedImageUrls,
             linkPreview: linkPreview?.url ? { url: linkPreview.url } : null,
             isMarkdown: containsMd,
-            contentBlocks: updatedContentBlocks.length > 0 ? updatedContentBlocks : null,
+            contentBlocks:
+                updatedContentBlocks.length > 0 ? updatedContentBlocks : null,
         };
 
         setIsLoading(true);
@@ -347,11 +354,22 @@ export default function PostComposer({
             {/* Community Indicator */}
             {(defaultCommunity || manualCommunity) && (
                 <div className="hidden sm:flex items-center gap-2 mb-3 px-1">
-                    <Badge variant="secondary" className="gap-1.5 py-1 px-3 rounded-full bg-primary/10 text-primary border-primary/20">
-                        <span>{activeCommunity?.emoji || '🌐'}</span>
-                        <span>Posting to {activeCommunity?.name || defaultCommunity || manualCommunity}</span>
+                    <Badge
+                        variant="secondary"
+                        className="gap-1.5 py-1 px-3 rounded-full bg-primary/10 text-primary border-primary/20"
+                    >
+                        <span>{activeCommunity?.emoji || "🌐"}</span>
+                        <span>
+                            Posting to{" "}
+                            {activeCommunity?.name ||
+                                defaultCommunity ||
+                                manualCommunity}
+                        </span>
                         {!defaultCommunity && (
-                            <button onClick={() => setManualCommunity("")} className="ml-1 hover:text-destructive">
+                            <button
+                                onClick={() => setManualCommunity("")}
+                                className="ml-1 hover:text-destructive"
+                            >
                                 <X className="w-3 h-3" />
                             </button>
                         )}
@@ -424,7 +442,10 @@ export default function PostComposer({
                     {/* Link Preview */}
                     {linkPreview && (
                         <div className="mt-2 flex items-center gap-2">
-                            <LinkPreview url={linkPreview.url} clickable={false} />
+                            <LinkPreview
+                                url={linkPreview.url}
+                                clickable={false}
+                            />
                             <button
                                 onClick={() => setLinkPreview(null)}
                                 className="p-1 rounded-full hover:bg-accent text-muted-foreground transition-colors"
@@ -516,13 +537,16 @@ export default function PostComposer({
                                                     size="sm"
                                                     className={cn(
                                                         "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                                        manualCommunity ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
+                                                        manualCommunity
+                                                            ? "text-primary border border-primary/10 rounded-md"
+                                                            : "text-muted-foreground hover:text-primary",
                                                     )}
                                                 >
                                                     <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                     {manualCommunity ? (
                                                         <span className="text-[10px] sm:text-xs truncate max-w-[80px]">
-                                                            {activeCommunity?.name || manualCommunity}
+                                                            {activeCommunity?.name ||
+                                                                manualCommunity}
                                                         </span>
                                                     ) : null}
                                                 </Button>
@@ -625,7 +649,9 @@ export default function PostComposer({
                                             )}
                                             aria-label="Add GIF"
                                         >
-                                            <span className="text-xs font-medium">GIF</span>
+                                            <span className="text-xs font-medium">
+                                                GIF
+                                            </span>
                                         </Button>
                                     }
                                 />
@@ -642,11 +668,33 @@ export default function PostComposer({
                                             className="hover:cursor-pointer h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3 transition-colors"
                                             aria-label="Add emoji"
                                         >
-                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="12" cy="12" r="10"></circle>
+                                            <svg
+                                                className="w-4 h-4"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                ></circle>
                                                 <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                                <line
+                                                    x1="9"
+                                                    y1="9"
+                                                    x2="9.01"
+                                                    y2="9"
+                                                ></line>
+                                                <line
+                                                    x1="15"
+                                                    y1="9"
+                                                    x2="15.01"
+                                                    y2="9"
+                                                ></line>
                                             </svg>
                                         </Button>
                                     }
@@ -655,7 +703,10 @@ export default function PostComposer({
                         </div>
 
                         <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-border/50">
-                            <CharacterProgressRing length={content.length} maxLength={2000} />
+                            <CharacterProgressRing
+                                length={content.length}
+                                maxLength={2000}
+                            />
                             <Button
                                 onClick={handleSubmit}
                                 disabled={
