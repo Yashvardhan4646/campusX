@@ -23,6 +23,7 @@ import {
     Heart,
     Trophy,
     Code,
+    CreditCard,
 } from "lucide-react";
 import { useChatUnreadCount } from "@/hooks/useChatUnreadCount";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,7 @@ export default function Sidebar() {
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Bookmarks", href: "/bookmarks", icon: Bookmark },
         { label: "Tools", href: "/tools", icon: Terminal },
+        { label: "Billing", href: "/billing", icon: CreditCard },
         { label: "Settings", href: "/settings", icon: Settings },
         // { label: "Profile", href: user?.username ? `/profile/${user.username}` : "/login", icon: User },
     ];
