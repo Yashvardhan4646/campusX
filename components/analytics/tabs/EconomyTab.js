@@ -7,12 +7,12 @@ import { Coins, TrendingUp, TrendingDown, Settings } from 'lucide-react'
 const RANGE_LABELS = { '7d': 'Last 7 Days', '30d': 'Last 30 Days', '90d': 'Last 90 Days', 'all': 'All Time' }
 
 export default function EconomyTab({ data, range }) {
-    const { coins } = data
+    const { coins } = data || {}
     const rangeLabel = RANGE_LABELS[range] ?? range
 
-    const chartData = (coins.timeSeries ?? []).map(d => ({ label: d.date, value: d.count }))
+    const chartData = (coins?.timeSeries ?? []).map(d => ({ label: d.date, value: d.count }))
 
-    const donutData = (coins.byReason ?? []).slice(0, 8).map(r => ({
+    const donutData = (coins?.byReason ?? []).slice(0, 8).map(r => ({
         label: r.reason.replace(/_/g, ' '),
         value: r.total,
     }))
@@ -20,11 +20,11 @@ export default function EconomyTab({ data, range }) {
     return (
         <div className="p-4 space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <StatCard title="In Circulation" value={coins.totalCirculation} icon={Coins} />
-                <StatCard title="Lifetime Earned" value={coins.lifetimeEarned} icon={TrendingUp} />
-                <StatCard title="Lifetime Spent" value={coins.lifetimeSpent} icon={TrendingDown} />
-                <StatCard title={`Volume (${rangeLabel})`} value={coins.volumeInRange} icon={Coins} />
-                <StatCard title="Admin Adjustments" value={coins.adminAdjustCount} icon={Settings} />
+                <StatCard title="In Circulation" value={coins?.totalCirculation} icon={Coins} />
+                <StatCard title="Lifetime Earned" value={coins?.lifetimeEarned} icon={TrendingUp} />
+                <StatCard title="Lifetime Spent" value={coins?.lifetimeSpent} icon={TrendingDown} />
+                <StatCard title={`Volume (${rangeLabel})`} value={coins?.volumeInRange} icon={Coins} />
+                <StatCard title="Admin Adjustments" value={coins?.adminAdjustCount} icon={Settings} />
             </div>
 
             <BarChart
@@ -45,7 +45,7 @@ export default function EconomyTab({ data, range }) {
                         { key: 'username', label: 'User' },
                         { key: 'totalEarned', label: 'Earned', numeric: true },
                     ]}
-                    rows={coins.topEarners ?? []}
+                    rows={coins?.topEarners ?? []}
                 />
                 <RankedTable
                     title="Top Spenders"
@@ -53,7 +53,7 @@ export default function EconomyTab({ data, range }) {
                         { key: 'username', label: 'User' },
                         { key: 'totalSpent', label: 'Spent', numeric: true },
                     ]}
-                    rows={coins.topSpenders ?? []}
+                    rows={coins?.topSpenders ?? []}
                 />
             </div>
         </div>
