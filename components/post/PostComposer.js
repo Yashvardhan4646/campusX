@@ -32,11 +32,39 @@ import LinkPreview from "@/components/shared/LinkPreview";
 import MarkdownRenderer from "@/components/shared/MarkdownRenderer";
 import GifPicker from "@/components/post/GifPicker";
 import EmojiPicker from "@/components/post/EmojiPicker";
+import { MultiSelect } from "@/components/shared/MultiSelect";
 import { cn } from "@/lib/utils";
 import { containsMarkdown } from "@/utils/markdown";
 import useUser from "@/hooks/useUser";
 import { useDebounce } from "@/hooks/useDebounce";
 import CommunitySwitcher from "@/components/feed/CommunitySwitcher";
+
+const TAG_OPTIONS = [
+    "Programming",
+    "Web Development",
+    "AI",
+    "Hackathons",
+    "Placements",
+    "Startups",
+    "Design",
+    "Photography",
+    "Gaming",
+    "Cricket",
+    "Music",
+    "Memes",
+    "Finance",
+    "Entrepreneurship",
+    "College Life",
+    "Events",
+    "Next.js",
+    "React",
+    "JavaScript",
+    "Python",
+    "Java",
+    "C++",
+    "Machine Learning",
+    "Data Science",
+];
 
 // Character Progress Ring Component
 function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
@@ -112,6 +140,7 @@ export default function PostComposer({
     const [showPoll, setShowPoll] = useState(false);
     const [pollOptions, setPollOptions] = useState(["", ""]);
     const [isUploadingImages, setIsUploadingImages] = useState(false);
+    const [tags, setTags] = useState([]);
 
     useEffect(() => {
         const fetchCommunities = async () => {
@@ -324,6 +353,7 @@ export default function PostComposer({
             isMarkdown: containsMd,
             contentBlocks:
                 updatedContentBlocks.length > 0 ? updatedContentBlocks : null,
+            tags,
         };
 
         setIsLoading(true);
@@ -457,6 +487,21 @@ export default function PostComposer({
                         </div>
                     )}
 
+                    {/* Tags */}
+                    <div className="mt-3 space-y-1.5">
+                        <label className="text-sm font-medium text-muted-foreground">
+                            Tags
+                        </label>
+                        <MultiSelect
+                            options={TAG_OPTIONS}
+                            selected={tags}
+                            onChange={setTags}
+                            placeholder="Select tags..."
+                            maxSelected={5}
+                            disabled={isLoading || isUploadingImages}
+                        />
+                    </div>
+
                     {/* Link Preview */}
                     {linkPreview && (
                         <div className="mt-2 flex items-center gap-2">
@@ -543,36 +588,6 @@ export default function PostComposer({
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-3 border-t border-border gap-3">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
                             <div className="flex items-center gap-1">
-                                {!defaultCommunity && (
-                                    <div className="hidden sm:block mr-1">
-                                        <CommunitySwitcher
-                                            selectedCommunity={manualCommunity}
-                                            onSelect={setManualCommunity}
-                                            trigger={
-                                                <Button
-                                                    title="Select Community"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className={cn(
-                                                        "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                                        manualCommunity
-                                                            ? "text-primary border border-primary/10 rounded-md"
-                                                            : "text-muted-foreground hover:text-primary",
-                                                    )}
-                                                >
-                                                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                    {manualCommunity ? (
-                                                        <span className="text-[10px] sm:text-xs truncate max-w-[80px]">
-                                                            {activeCommunity?.name ||
-                                                                manualCommunity}
-                                                        </span>
-                                                    ) : null}
-                                                </Button>
-                                            }
-                                        />
-                                    </div>
-                                )}
-
                                 {/* Poll Button */}
                                 <TooltipProvider>
                                     <Tooltip>
