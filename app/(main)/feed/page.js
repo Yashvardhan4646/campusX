@@ -31,7 +31,17 @@ const PostComposer = dynamic(() => import("@/components/post/PostComposer"), {
 export default function FeedPage() {
     const { user: currentUser, refetch: refetchCurrentUser } = useUser();
     const [selectedCommunity, setSelectedCommunity] = useState(null);
-    const [isLatestMode, setIsLatestMode] = useState(false); // false = default/random, true = latest 8h
+    const [activeTab, setActiveTab] = useState("discover"); // discover, interests, new
+
+    // Check if user has AI in their interests to show the secondary tab
+    const shouldShowInterestsTab =
+        currentUser?.interests?.includes("AI") &&
+        currentUser?.interests?.length > 0;
+
+    // Determine mode based on active tab
+    const isLatestMode = activeTab === "new";
+    // Determine feedType based on active tab
+    const feedType = activeTab === "new" ? "discover" : activeTab;
 
     const {
         posts,
@@ -46,6 +56,7 @@ export default function FeedPage() {
     } = usePosts({
         ...(selectedCommunity && { community: selectedCommunity }),
         mode: isLatestMode ? "latest8h" : "default",
+        feedType: feedType,
     });
 
     const parentRef = useRef(null);
@@ -57,7 +68,7 @@ export default function FeedPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setModeKey((prev) => prev + 1);
-    }, [isLatestMode, selectedCommunity]);
+    }, [selectedCommunity, activeTab]);
 
     useEffect(() => {
         if (parentRef.current) {
@@ -122,8 +133,8 @@ export default function FeedPage() {
         [updatePostLike],
     );
 
-    const toggleMode = useCallback(() => {
-        setIsLatestMode((prev) => !prev);
+    const handleTabChange = useCallback((tab) => {
+        setActiveTab(tab);
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
@@ -145,29 +156,58 @@ export default function FeedPage() {
                 />
             </div>
 
+            {/* Tabs */}
+            <div className="sticky top-16 sm:top-14 bg-background border-b border-border z-10">
+                <div className="flex">
+                    <button
+                        onClick={() => handleTabChange("discover")}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                            activeTab === "discover"
+                                ? "text-primary"
+                                : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        Discover
+                        {activeTab === "discover" && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                        )}
+                    </button>
+                    {shouldShowInterestsTab && (
+                        <button
+                            onClick={() => handleTabChange("interests")}
+                            className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                                activeTab === "interests"
+                                    ? "text-primary"
+                                    : "text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            Interests
+                            {activeTab === "interests" && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                            )}
+                        </button>
+                    )}
+                    <button
+                        onClick={() => handleTabChange("new")}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                            activeTab === "new"
+                                ? "text-primary"
+                                : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                        Latest
+                        {activeTab === "new" && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                        )}
+                    </button>
+                </div>
+            </div>
+
             {/* Post composer */}
             <PostComposer
                 onPostCreated={handlePostCreated}
                 defaultCommunity={selectedCommunity}
             />
-
-            {/* New Button */}
-            <div className="sticky top-auto z-10 border-b border-border bg-background/80 backdrop-blur-md p-3">
-                <button
-                    onClick={toggleMode}
-                    className={`
-            w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-medium
-            ${
-                isLatestMode
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }
-          `}
-                >
-                    <Zap size={18} />
-                    {isLatestMode ? "Turn Off" : "Show New Posts"}
-                </button>
-            </div>
 
             {/* Push permission banner */}
             <PushPromptManager newNotification={newNotification} />
@@ -184,14 +224,18 @@ export default function FeedPage() {
                         title={
                             isLatestMode
                                 ? "No new posts in 8 hours"
-                                : "No posts yet"
+                                : activeTab === "interests"
+                                  ? "No posts matching your interests yet"
+                                  : "No posts yet"
                         }
                         description={
                             isLatestMode
                                 ? "Check back later for new posts"
-                                : selectedCommunity
-                                  ? `Be the first to post in ${selectedCommunity}!`
-                                  : "Be the first to post what's happening on campus!"
+                                : activeTab === "interests"
+                                  ? "Check back later or update your interests!"
+                                  : selectedCommunity
+                                    ? `Be the first to post in ${selectedCommunity}!`
+                                    : "Be the first to post what's happening on campus!"
                         }
                     />
                 ) : (
