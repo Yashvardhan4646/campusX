@@ -112,13 +112,12 @@ function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
             </svg>
             {/* Number in center */}
             <span
-                className={`absolute text-[10px] font-bold tabular-nums ${
-                    length > maxLength
+                className={`absolute text-[10px] font-bold tabular-nums ${length > maxLength
                         ? "text-red-500"
                         : remaining <= 200
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                }`}
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                    }`}
             >
                 {showNumber ? remaining : ""}
             </span>
@@ -489,9 +488,6 @@ export default function PostComposer({
 
                     {/* Tags */}
                     <div className="mt-3 space-y-1.5">
-                        <label className="text-sm font-medium text-muted-foreground">
-                            Tags
-                        </label>
                         <MultiSelect
                             options={TAG_OPTIONS}
                             selected={tags}
@@ -657,7 +653,7 @@ export default function PostComposer({
                                                 }}
                                                 disabled={
                                                     selectedImages.length >=
-                                                        6 || !currentUser?.isPro
+                                                    6 || !currentUser?.isPro
                                                 }
                                                 aria-label="Add image"
                                             >
