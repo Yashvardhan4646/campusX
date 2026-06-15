@@ -27,7 +27,7 @@ export default function RightPanel() {
         setLoading(true)
         const [trendRes, suggestRes, hashtagRes, eventRes] = await Promise.all([
           fetch('/api/communities?limit=5'),
-          fetch('/api/users/suggestions'),
+          fetch("/api/users/suggestions?limit=9"),
           fetch('/api/hashtags/trending?limit=6'),
           fetch('/api/events?filter=upcoming&limit=3')
         ])
@@ -188,7 +188,7 @@ export default function RightPanel() {
           ) : suggestions.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2">No suggestions found.</p>
           ) : (
-            suggestions.slice(0, 5).map((user) => (
+            suggestions.slice(-9).map((user) => (
               <div key={user._id} className="flex items-center justify-between gap-3">
                 <Link href={`/profile/${user.username}`} className="flex items-center gap-3 min-w-0 flex-1">
                   <Avatar className="h-9 w-9">
@@ -217,10 +217,8 @@ export default function RightPanel() {
           <Link href="/terms" className="hover:underline cursor-pointer">Terms of Service</Link>
           <Link href="/privacy" className="hover:underline cursor-pointer">Privacy Policy</Link>
           <Link href="https://instagram.com/user.__.ayush" target='blank_' className="hover:underline cursor-pointer">Developer</Link>
-          {/* <Link href="/cookie" className="hover:underline cursor-pointer">Cookie Policy</Link>
-          <Link href="/accessibility" className="hover:underline cursor-pointer">Accessibility</Link> */}
         </div>
-        <p>© 2026 CampusX · Built for students</p>
+        <p>© {new Date().getFullYear()} CampusZen · Built for students</p>
       </footer>
     </aside>
   )
