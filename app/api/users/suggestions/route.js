@@ -9,19 +9,29 @@ export async function GET(request) {
     const currentUser = await getCurrentUser(request);
     await connectDB();
 
-    const query = currentUser ? { _id: { $ne: currentUser._id } } : {};
-    
-    // Suggest users (excluding self if logged in, limited to 5)
+    const { searchParams } = new URL(request.url);
+    const limit = Number(searchParams.get("limit")) || 5;
+
+    const query = currentUser
+      ? { _id: { $ne: currentUser._id } }
+      : {};
+
     const suggestions = await User.find(query)
-      .limit(5)
-      .select('name username avatar college')
+      .sort({ createdAt: -1 }) // Latest users first
+      .limit(limit)
+      .select("name username avatar college")
       .lean();
 
-    const sanitizedSuggestions = suggestions.map(user => sanitizeUser(user));
+    const sanitizedSuggestions = suggestions.map((user) =>
+      sanitizeUser(user)
+    );
 
     return NextResponse.json(sanitizedSuggestions);
   } catch (error) {
-    console.error('Suggestions API error:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    console.error("Suggestions API error:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
