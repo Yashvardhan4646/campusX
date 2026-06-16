@@ -2,14 +2,19 @@ import { NextResponse } from "next/server";
 
 const protectedRoutes = [
     "/feed",
+    "/search",
+    "/leaderboard",
+    "/notifications",
     "/communities",
     "/resources",
-    "/profile",
     "/settings",
     "/community",
     "/bookmarks",
     "/wallet",
     "/shop",
+    "/chats",
+    "/events",
+    "/billing",
 ];
 
 export default async function middleware(request) {
