@@ -10,6 +10,7 @@ import {
     FileCode,
     Eye,
     Edit3,
+    Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,9 +61,9 @@ const TAG_OPTIONS = [
     "Data Science",
 ];
 
-// Character Progress Ring Component
+// Character Progress Ring — compact, only reads as "urgent" near the limit
 function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
-    const radius = 12;
+    const radius = 11;
     const circumference = 2 * Math.PI * radius;
     const progress = Math.min(length / maxLength, 1);
     const strokeDashoffset = circumference - progress * circumference;
@@ -74,48 +75,54 @@ function CharacterProgressRing({ length = 0, maxLength = 2000 }) {
         if (pct >= 100) return "#ef4444"; // red
         if (pct >= 95) return "#f97316"; // orange
         if (pct >= 80) return "#facc15"; // yellow
-        return "hsl(var(--primary))"; // primary green
+        return "hsl(var(--primary))";
     };
 
+    if (!showNumber) return null;
+
     return (
-        <div className="relative w-8 h-8 flex items-center justify-center">
-            <svg className="transform -rotate-90 w-8 h-8" viewBox="0 0 32 32">
-                {/* Background ring */}
+        <div className="relative w-7 h-7 flex items-center justify-center shrink-0">
+            <svg className="-rotate-90 w-7 h-7" viewBox="0 0 28 28">
                 <circle
-                    cx="16"
-                    cy="16"
+                    cx="14"
+                    cy="14"
                     r={radius}
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="3"
-                    className="text-muted-foreground/20"
+                    strokeWidth="2.5"
+                    className="text-muted-foreground/15"
                 />
-                {/* Progress ring */}
                 <circle
-                    cx="16"
-                    cy="16"
+                    cx="14"
+                    cy="14"
                     r={radius}
                     fill="none"
                     stroke={getColor()}
-                    strokeWidth="3"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
                     className="transition-all duration-300 ease-out"
                 />
             </svg>
-            {/* Number in center */}
             <span
-                className={`absolute text-[10px] font-bold tabular-nums ${length > maxLength
-                        ? "text-red-500"
-                        : remaining <= 200
-                            ? "text-foreground"
-                            : "text-muted-foreground"
-                    }`}
+                className={cn(
+                    "absolute text-[9px] font-semibold tabular-nums",
+                    length > maxLength ? "text-red-500" : "text-foreground",
+                )}
             >
-                {showNumber ? remaining : ""}
+                {remaining}
             </span>
         </div>
+    );
+}
+
+// Small "Pro" lock badge shown on gated toolbar actions
+function ProLockBadge() {
+    return (
+        <span className="absolute -top-1 -right-1 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-primary text-primary-foreground ring-2 ring-background">
+            <Lock className="w-2 h-2" strokeWidth={3} />
+        </span>
     );
 }
 
@@ -166,6 +173,15 @@ export default function PostComposer({
     const fileInputRef = useRef(null);
     const markdownFileInputRef = useRef(null);
 
+    // Auto-grow textarea, capped so the composer stays compact
+    const textareaRef = useRef(null);
+    useEffect(() => {
+        const el = textareaRef.current;
+        if (!el) return;
+        el.style.height = "auto";
+        el.style.height = `${Math.min(el.scrollHeight, 280)}px`;
+    }, [content, isMarkdownPreview]);
+
     // Content blocks for GIFs and emojis
     const [contentBlocks, setContentBlocks] = useState([]);
     const [selectedGIFs, setSelectedGIFs] = useState([]);
@@ -192,13 +208,6 @@ export default function PostComposer({
             setLinkPreview(null);
         }
     }, [debouncedContent]);
-
-    const getCounterColor = (len) => {
-        if (len > 2000) return "text-destructive font-bold";
-        if (len > 1900) return "text-orange-400";
-        if (len > 1600) return "text-yellow-400";
-        return "text-muted-foreground";
-    };
 
     const handleImageSelect = (e) => {
         const files = Array.from(e.target.files || []);
@@ -385,10 +394,13 @@ export default function PostComposer({
         }
     };
 
+    const iconBtnBase =
+        "relative inline-flex items-center justify-center h-8 rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:pointer-events-none disabled:hover:bg-transparent";
+
     return (
         <div
             className={cn(
-                "p-4 bg-background/50",
+                "px-4 py-3.5 bg-background/50",
                 !noBorder && "border-b border-border",
             )}
         >
@@ -397,9 +409,11 @@ export default function PostComposer({
                 <div className="hidden sm:flex items-center gap-2 mb-3 px-1">
                     <Badge
                         variant="secondary"
-                        className="gap-1.5 py-1 px-3 rounded-full bg-primary/10 text-primary border-primary/20"
+                        className="gap-1.5 py-1 px-2.5 rounded-full bg-primary/10 text-primary border border-primary/15 font-medium"
                     >
-                        <span>{activeCommunity?.emoji || "🌐"}</span>
+                        <span className="leading-none">
+                            {activeCommunity?.emoji || "🌐"}
+                        </span>
                         <span>
                             Posting to{" "}
                             {activeCommunity?.name ||
@@ -409,7 +423,8 @@ export default function PostComposer({
                         {!defaultCommunity && (
                             <button
                                 onClick={() => setManualCommunity("")}
-                                className="ml-1 hover:text-destructive"
+                                className="ml-0.5 hover:text-destructive transition-colors"
+                                aria-label="Clear community"
                             >
                                 <X className="w-3 h-3" />
                             </button>
@@ -417,71 +432,78 @@ export default function PostComposer({
                     </Badge>
                 </div>
             )}
+
             <div className="flex gap-3">
                 <UserAvatar user={currentUser} size="md" />
-                <div className="flex-1">
-                    {/* Markdown preview/edit toggle */}
-                    {content && (
-                        <div className="flex items-center gap-2 mb-2 border-b border-border pb-2">
-                            <button
+                <div className="flex-1 min-w-0">
+                    {/* Composer surface — text input + markdown toggle share one quiet, focus-aware card */}
+                    <div className="rounded-xl transition-colors duration-200 -mx-2 -mt-1.5 px-2 pt-1.5 focus-within:bg-muted/40">
+                        {/* Markdown preview/edit toggle — segmented control, only shown once there's something to toggle */}
+                        {content && (
+                            <div className="inline-flex items-center gap-0.5 p-0.5 mb-1.5 bg-muted rounded-full">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMarkdownPreview(false)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150",
+                                        !isMarkdownPreview
+                                            ? "bg-background text-foreground shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground",
+                                    )}
+                                >
+                                    <Edit3 className="w-3 h-3" />
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMarkdownPreview(true)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150",
+                                        isMarkdownPreview
+                                            ? "bg-background text-foreground shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground",
+                                    )}
+                                >
+                                    <Eye className="w-3 h-3" />
+                                    Preview
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Edit mode */}
+                        {!isMarkdownPreview && (
+                            <Textarea
+                                ref={textareaRef}
+                                placeholder="What's happening on campus?"
+                                className="resize-none border-none bg-transparent p-2 min-h-[44px] max-h-[280px] overflow-y-auto font-sans text-[15px] leading-relaxed placeholder:text-muted-foreground/60 rounded-lg shadow-none focus-visible:ring-0 focus-visible:outline-none"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                maxLength={2000}
+                            />
+                        )}
+
+                        {/* Preview mode */}
+                        {isMarkdownPreview && (
+                            <div
+                                className="min-h-[44px] px-2 pb-2 cursor-text"
                                 onClick={() => setIsMarkdownPreview(false)}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                    !isMarkdownPreview
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted text-muted-foreground hover:bg-muted/80",
-                                )}
                             >
-                                <Edit3 className="w-3 h-3" />
-                                Edit
-                            </button>
-                            <button
-                                onClick={() => setIsMarkdownPreview(true)}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                                    isMarkdownPreview
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted text-muted-foreground hover:bg-muted/80",
+                                {content ? (
+                                    <MarkdownRenderer
+                                        content={content}
+                                        className="text-[15px]"
+                                    />
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Nothing to preview...
+                                    </p>
                                 )}
-                            >
-                                <Eye className="w-3 h-3" />
-                                Preview
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Edit mode */}
-                    {!isMarkdownPreview && (
-                        <Textarea
-                            placeholder="What's happening on campus?"
-                            className="resize-none border-none bg-background/50 p-2 min-h-25 font-sans-serif rounded-xl"
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            maxLength={2000}
-                        />
-                    )}
-
-                    {/* Preview mode */}
-                    {isMarkdownPreview && (
-                        <div
-                            className="min-h-25 cursor-pointer"
-                            onClick={() => setIsMarkdownPreview(false)}
-                        >
-                            {content ? (
-                                <MarkdownRenderer
-                                    content={content}
-                                    className="text-lg"
-                                />
-                            ) : (
-                                <p className="text-muted-foreground">
-                                    Nothing to preview...
-                                </p>
-                            )}
-                        </div>
-                    )}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Tags */}
-                    <div className="mt-3 space-y-1.5">
+                    <div className="mt-2.5">
                         <MultiSelect
                             options={TAG_OPTIONS}
                             selected={tags}
@@ -494,14 +516,17 @@ export default function PostComposer({
 
                     {/* Link Preview */}
                     {linkPreview && (
-                        <div className="mt-2 flex items-center gap-2">
-                            <LinkPreview
-                                url={linkPreview.url}
-                                clickable={false}
-                            />
+                        <div className="mt-2.5 flex items-start gap-2">
+                            <div className="flex-1 min-w-0 rounded-xl border border-border/60 overflow-hidden">
+                                <LinkPreview
+                                    url={linkPreview.url}
+                                    clickable={false}
+                                />
+                            </div>
                             <button
                                 onClick={() => setLinkPreview(null)}
-                                className="p-1 rounded-full hover:bg-accent text-muted-foreground transition-colors"
+                                className="p-1 rounded-full hover:bg-accent text-muted-foreground transition-colors shrink-0"
+                                aria-label="Remove link preview"
                             >
                                 <X className="w-3 h-3" />
                             </button>
@@ -510,23 +535,25 @@ export default function PostComposer({
 
                     {/* Poll Creator */}
                     {showPoll && (
-                        <PollCreator
-                            options={pollOptions}
-                            onChange={setPollOptions}
-                            onRemove={() => {
-                                setShowPoll(false);
-                                setPollOptions(["", ""]);
-                            }}
-                        />
+                        <div className="mt-2.5">
+                            <PollCreator
+                                options={pollOptions}
+                                onChange={setPollOptions}
+                                onRemove={() => {
+                                    setShowPoll(false);
+                                    setPollOptions(["", ""]);
+                                }}
+                            />
+                        </div>
                     )}
 
                     {/* Image Preview Strip */}
                     {selectedImages.length > 0 && (
-                        <div className="mt-2 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                        <div className="mt-2.5 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                             {selectedImages.map((file, i) => (
                                 <div
                                     key={i}
-                                    className="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-accent/20 group"
+                                    className="relative shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-accent/20 ring-1 ring-border/60 group"
                                 >
                                     <img
                                         src={URL.createObjectURL(file)}
@@ -536,7 +563,7 @@ export default function PostComposer({
                                     <button
                                         type="button"
                                         onClick={() => removeImage(i)}
-                                        className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-background/80 hover:bg-background text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-1 right-1 p-0.5 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                         aria-label="Remove image"
                                     >
                                         <X className="w-3 h-3" />
@@ -548,11 +575,11 @@ export default function PostComposer({
 
                     {/* GIF Preview Strip */}
                     {selectedGIFs.length > 0 && (
-                        <div className="mt-2 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                        <div className="mt-2.5 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                             {selectedGIFs.map((gif, i) => (
                                 <div
                                     key={i}
-                                    className="relative shrink-0 w-24 h-16 rounded-lg overflow-hidden bg-accent/20 group"
+                                    className="relative shrink-0 w-24 h-16 rounded-xl overflow-hidden bg-accent/20 ring-1 ring-border/60 group"
                                 >
                                     <img
                                         src={gif.previewUrl}
@@ -562,12 +589,12 @@ export default function PostComposer({
                                     <button
                                         type="button"
                                         onClick={() => removeGif(i)}
-                                        className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-background/80 hover:bg-background text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-1 right-1 p-0.5 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                         aria-label="Remove GIF"
                                     >
                                         <X className="w-3 h-3" />
                                     </button>
-                                    <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-black/50 text-white px-1 rounded">
+                                    <span className="absolute bottom-1 left-1 text-[9px] font-medium tracking-wide bg-black/60 backdrop-blur-sm text-white px-1.5 py-0.5 rounded">
                                         GIF
                                     </span>
                                 </div>
@@ -575,196 +602,199 @@ export default function PostComposer({
                         </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-3 border-t border-border gap-3">
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                            <div className="flex items-center gap-1">
-                                {/* Poll Button */}
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                title="Create a poll"
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className={cn(
-                                                    " hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                                    showPoll
-                                                        ? "text-primary bg-primary/10"
-                                                        : "text-muted-foreground hover:text-primary",
-                                                )}
-                                                onClick={(e) => {
-                                                    if (!currentUser?.isPro) {
-                                                        e.preventDefault();
-                                                        router.push("/billing");
-                                                    } else {
-                                                        setShowPoll(!showPoll);
-                                                    }
-                                                }}
-                                                aria-label="Create a poll"
-                                            >
-                                                <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        {!currentUser?.isPro && (
-                                            <TooltipContent>
-                                                <span>Pro Feature</span>
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                </TooltipProvider>
-
-                                {/* Image attachment button */}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleImageSelect}
-                                />
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                title="Add image"
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className={cn(
-                                                    "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                                    selectedImages.length > 0
-                                                        ? "text-primary bg-primary/10"
-                                                        : "text-muted-foreground hover:text-primary",
-                                                )}
-                                                onClick={(e) => {
-                                                    if (!currentUser?.isPro) {
-                                                        e.preventDefault();
-                                                        router.push("/billing");
-                                                    } else {
-                                                        fileInputRef.current?.click();
-                                                    }
-                                                }}
-                                                disabled={
-                                                    selectedImages.length >=
-                                                    6 || !currentUser?.isPro
-                                                }
-                                                aria-label="Add image"
-                                            >
-                                                <ImagePlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                                {selectedImages.length > 0 ? (
-                                                    <span className="text-[10px] sm:text-xs">
-                                                        {selectedImages.length}
-                                                        /6
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-[10px] sm:text-xs"></span>
-                                                )}
-                                            </Button>
-                                        </TooltipTrigger>
-                                        {!currentUser?.isPro && (
-                                            <TooltipContent>
-                                                <span>Pro Feature</span>
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                </TooltipProvider>
-
-                                {/* Markdown file attachment button */}
-                                <input
-                                    ref={markdownFileInputRef}
-                                    type="file"
-                                    accept=".md,.txt"
-                                    className="hidden"
-                                    onChange={handleMarkdownFileSelect}
-                                />
-                                <Button
-                                    title="Upload Markdown File"
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className={cn(
-                                        " hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                        "text-muted-foreground hover:text-primary",
-                                    )}
-                                    onClick={() =>
-                                        markdownFileInputRef.current?.click()
-                                    }
-                                >
-                                    <FileCode className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                </Button>
-
-                                {/* GIF Picker Button */}
-                                <GifPicker
-                                    onSelect={addGif}
-                                    trigger={
+                    {/* Toolbar */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-2.5 border-t border-border/70 gap-2.5">
+                        <div className="flex items-center gap-0.5 w-full sm:w-auto">
+                            {/* Poll Button */}
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
                                         <Button
-                                            title="Add GIF"
+                                            title="Create a poll"
                                             type="button"
                                             variant="ghost"
                                             size="sm"
                                             className={cn(
-                                                "hover:cursor-pointer h-8 gap-1.5 rounded-full px-2 sm:px-3 transition-colors",
-                                                selectedGIFs.length > 0
-                                                    ? "text-primary bg-primary/10"
-                                                    : "text-muted-foreground hover:text-primary",
+                                                iconBtnBase,
+                                                "w-8 px-0",
+                                                showPoll &&
+                                                    "text-primary bg-primary/10 hover:bg-primary/15 hover:text-primary",
                                             )}
-                                            aria-label="Add GIF"
+                                            onClick={(e) => {
+                                                if (!currentUser?.isPro) {
+                                                    e.preventDefault();
+                                                    router.push("/billing");
+                                                } else {
+                                                    setShowPoll(!showPoll);
+                                                }
+                                            }}
+                                            aria-label="Create a poll"
                                         >
-                                            <span className="text-xs font-medium">
-                                                GIF
-                                            </span>
+                                            <BarChart2 className="w-4 h-4" />
+                                            {!currentUser?.isPro && (
+                                                <ProLockBadge />
+                                            )}
                                         </Button>
-                                    }
-                                />
+                                    </TooltipTrigger>
+                                    {!currentUser?.isPro && (
+                                        <TooltipContent>
+                                            <span>Pro Feature</span>
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                            </TooltipProvider>
 
-                                {/* Emoji Picker Button */}
-                                <EmojiPicker
-                                    onSelect={addEmoji}
-                                    trigger={
+                            {/* Image attachment button */}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                className="hidden"
+                                onChange={handleImageSelect}
+                            />
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
                                         <Button
-                                            title="Add emoji"
+                                            title="Add image"
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            className="hover:cursor-pointer h-8 gap-1.5 text-muted-foreground hover:text-primary rounded-full px-2 sm:px-3 transition-colors"
-                                            aria-label="Add emoji"
+                                            className={cn(
+                                                iconBtnBase,
+                                                selectedImages.length > 0
+                                                    ? "px-2 gap-1 text-primary bg-primary/10 hover:bg-primary/15 hover:text-primary"
+                                                    : "w-8 px-0",
+                                            )}
+                                            onClick={(e) => {
+                                                if (!currentUser?.isPro) {
+                                                    e.preventDefault();
+                                                    router.push("/billing");
+                                                } else {
+                                                    fileInputRef.current?.click();
+                                                }
+                                            }}
+                                            disabled={
+                                                selectedImages.length >= 6 ||
+                                                !currentUser?.isPro
+                                            }
+                                            aria-label="Add image"
                                         >
-                                            <svg
-                                                className="w-4 h-4"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <circle
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                ></circle>
-                                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                                                <line
-                                                    x1="9"
-                                                    y1="9"
-                                                    x2="9.01"
-                                                    y2="9"
-                                                ></line>
-                                                <line
-                                                    x1="15"
-                                                    y1="9"
-                                                    x2="15.01"
-                                                    y2="9"
-                                                ></line>
-                                            </svg>
+                                            <ImagePlus className="w-4 h-4" />
+                                            {selectedImages.length > 0 && (
+                                                <span className="text-[10px] font-medium tabular-nums">
+                                                    {selectedImages.length}/6
+                                                </span>
+                                            )}
+                                            {!currentUser?.isPro && (
+                                                <ProLockBadge />
+                                            )}
                                         </Button>
-                                    }
-                                />
-                            </div>
+                                    </TooltipTrigger>
+                                    {!currentUser?.isPro && (
+                                        <TooltipContent>
+                                            <span>Pro Feature</span>
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                            </TooltipProvider>
+
+                            {/* Markdown file attachment button */}
+                            <input
+                                ref={markdownFileInputRef}
+                                type="file"
+                                accept=".md,.txt"
+                                className="hidden"
+                                onChange={handleMarkdownFileSelect}
+                            />
+                            <Button
+                                title="Upload Markdown File"
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className={cn(iconBtnBase, "w-8 px-0")}
+                                onClick={() =>
+                                    markdownFileInputRef.current?.click()
+                                }
+                                aria-label="Upload markdown file"
+                            >
+                                <FileCode className="w-4 h-4" />
+                            </Button>
+
+                            <span
+                                className="w-px h-5 bg-border/70 mx-1"
+                                aria-hidden="true"
+                            />
+
+                            {/* GIF Picker Button */}
+                            <GifPicker
+                                onSelect={addGif}
+                                trigger={
+                                    <Button
+                                        title="Add GIF"
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className={cn(
+                                            iconBtnBase,
+                                            "w-8 px-0 text-[11px] font-bold tracking-tight",
+                                            selectedGIFs.length > 0 &&
+                                                "text-primary bg-primary/10 hover:bg-primary/15 hover:text-primary",
+                                        )}
+                                        aria-label="Add GIF"
+                                    >
+                                        GIF
+                                    </Button>
+                                }
+                            />
+
+                            {/* Emoji Picker Button */}
+                            <EmojiPicker
+                                onSelect={addEmoji}
+                                trigger={
+                                    <Button
+                                        title="Add emoji"
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className={cn(iconBtnBase, "w-8 px-0")}
+                                        aria-label="Add emoji"
+                                    >
+                                        <svg
+                                            className="w-4 h-4"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                            ></circle>
+                                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                            <line
+                                                x1="9"
+                                                y1="9"
+                                                x2="9.01"
+                                                y2="9"
+                                            ></line>
+                                            <line
+                                                x1="15"
+                                                y1="9"
+                                                x2="15.01"
+                                                y2="9"
+                                            ></line>
+                                        </svg>
+                                    </Button>
+                                }
+                            />
                         </div>
 
-                        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-border/50">
+                        <div className="flex items-center justify-between sm:justify-end gap-2.5 w-full sm:w-auto">
                             <CharacterProgressRing
                                 length={content.length}
                                 maxLength={2000}
@@ -778,11 +808,11 @@ export default function PostComposer({
                                     isUploadingImages
                                 }
                                 size="sm"
-                                className="rounded-full px-4 sm:px-5 text-xs sm:text-sm h-8 sm:h-9"
+                                className="rounded-full px-5 text-sm font-medium h-8 shadow-sm shadow-primary/20 transition-shadow duration-150 hover:shadow-md disabled:shadow-none"
                             >
                                 {isUploadingImages ? (
                                     <>
-                                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                        <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
                                         Uploading...
                                     </>
                                 ) : isLoading ? (
