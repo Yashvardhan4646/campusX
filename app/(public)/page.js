@@ -9,6 +9,9 @@ import Resource from "@/models/Resource";
 import { verifyToken } from "@/lib/auth-edge";
 
 const Stats = dynamic(() => import("@/components/landing/Stats"));
+const ProductShowcase = dynamic(
+    () => import("@/components/landing/ProductShowcase"),
+);
 const Features = dynamic(() => import("@/components/landing/Features"));
 const TechStack = dynamic(() => import("@/components/landing/TechStack"));
 const Footer = dynamic(() => import("@/components/landing/Footer"));
@@ -99,6 +102,7 @@ export default async function LandingPage() {
                 resources={stats.resources}
                 codeAreas={stats.codeAreas}
             />
+            <ProductShowcase />
             <Features />
             <Footer />
         </main>
