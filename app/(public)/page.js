@@ -13,6 +13,9 @@ const ProductShowcase = dynamic(
     () => import("@/components/landing/ProductShowcase"),
 );
 const Features = dynamic(() => import("@/components/landing/Features"));
+const WhyStudentsChoose = dynamic(
+    () => import("@/components/landing/WhyStudentsChoose"),
+);
 const TechStack = dynamic(() => import("@/components/landing/TechStack"));
 const Footer = dynamic(() => import("@/components/landing/Footer"));
 
@@ -104,6 +107,7 @@ export default async function LandingPage() {
             />
             <ProductShowcase />
             <Features />
+            <WhyStudentsChoose />
             <Footer />
         </main>
     );
