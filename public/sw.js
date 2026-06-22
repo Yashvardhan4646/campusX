@@ -1,158 +1,279 @@
-// CampusZen Service Worker
-// Handles: Push notifications, notification clicks
+// sw.js
 
-const CACHE_NAME = "campuszen-" + Date.now();
-const APP_URL = self.location.origin;
+const CACHE_NAME = "campuszen-v1";
 
-// ━━━ INSTALL EVENT ━━━
-// Called when service worker is first installed
+const STATIC_CACHE_PATHS = [
+    "/",
+    "/manifest.json",
+    "/favicon.ico",
+    "/icons/icon-192.png",
+    "/icons/icon-512.png",
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INSTALL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 self.addEventListener("install", (event) => {
     console.log("[SW] Installing...");
-    // Skip waiting — activate immediately
+
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(STATIC_CACHE_PATHS).catch(() => {
+                console.warn("[SW] Some assets could not be precached");
+            });
+        }),
+    );
+
     self.skipWaiting();
 });
 
-// ━━━ ACTIVATE EVENT ━━━
-// Called when service worker takes control
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ACTIVATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 self.addEventListener("activate", (event) => {
+    console.log("[SW] Activating...");
+
     event.waitUntil(
-        caches
-            .keys()
-            .then((keys) => {
-                return Promise.all(
+        Promise.all([
+            caches.keys().then((keys) =>
+                Promise.all(
                     keys.map((key) => {
                         if (key !== CACHE_NAME) {
                             return caches.delete(key);
                         }
                     }),
-                );
-            })
-            .then(() => self.clients.claim()),
+                ),
+            ),
+            self.clients.claim(),
+        ]),
     );
 });
 
-// ━━━ PUSH EVENT ━━━
-// This is the main event — fires when push notification arrives
-// Even if the app/tab is completely closed
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FETCH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+self.addEventListener("fetch", (event) => {
+    const request = event.request;
+
+    if (request.method !== "GET") return;
+
+    const url = new URL(request.url);
+
+    // Ignore external requests
+    if (url.origin !== self.location.origin) return;
+
+    // Never cache APIs/Auth
+    if (
+        url.pathname.startsWith("/api") ||
+        url.pathname.startsWith("/auth") ||
+        url.pathname.includes("/api/")
+    ) {
+        return;
+    }
+
+    // Cache First Strategy
+    if (
+        url.pathname.startsWith("/_next/static") ||
+        url.pathname.startsWith("/icons") ||
+        url.pathname === "/manifest.json" ||
+        url.pathname === "/favicon.ico"
+    ) {
+        event.respondWith(
+            caches.match(request).then(async (cached) => {
+                if (cached) return cached;
+
+                const response = await fetch(request);
+
+                if (response.ok) {
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, response.clone());
+                }
+
+                return response;
+            }),
+        );
+
+        return;
+    }
+
+    // Network First Strategy
+    event.respondWith(
+        fetch(request)
+            .then(async (response) => {
+                if (response.ok) {
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, response.clone());
+                }
+
+                return response;
+            })
+            .catch(async () => {
+                const cached = await caches.match(request);
+
+                if (cached) return cached;
+
+                return new Response("Offline", {
+                    status: 503,
+                    statusText: "Offline",
+                });
+            }),
+    );
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PUSH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 self.addEventListener("push", (event) => {
     console.log("[SW] Push received");
 
-    // Default payload in case parsing fails
-    let data = {
+    const defaults = {
         title: "CampusZen",
         body: "You have a new notification",
         icon: "/icons/notification-icon.png",
         badge: "/icons/badge-icon.png",
-        tag: "campuszen-default",
-        data: { url: "/notifications" },
+        tag: "campuszen",
+        data: {
+            url: "/notifications",
+            notificationId: null,
+        },
     };
 
-    // Parse the push data
+    let payload = defaults;
+
     if (event.data) {
         try {
-            data = { ...data, ...event.data.json() };
+            const parsed = event.data.json();
+
+            payload = {
+                ...defaults,
+                ...parsed,
+                data: {
+                    ...defaults.data,
+                    ...(parsed.data || {}),
+                },
+            };
         } catch (err) {
-            console.error("[SW] Failed to parse push data:", err);
+            console.error("[SW] Push parse failed:", err);
         }
     }
 
-    // Show the notification
-    const notificationOptions = {
-        body: data.body,
-        icon: data.icon || "/icons/notification-icon.png",
-        badge: data.badge || "/icons/badge-icon.png",
-        image: data.image || null, // Large preview image
-
-        // tag: groups notifications — same tag replaces old one
-        // prevents notification spam
-        tag: data.tag || "campusx",
-
-        // renotify: true = play sound even if replacing same tag
-        renotify: true,
-
-        // data passed to notificationclick event
-        data: {
-            url: data.data?.url || "/notifications",
-            notificationId: data.data?.notificationId,
-        },
-
-        // Actions (buttons in notification)
-        actions: [
-            {
-                action: "view",
-                title: "View",
-            },
-            {
-                action: "dismiss",
-                title: "Dismiss",
-            },
-        ],
-
-        // Vibration pattern for mobile (Android)
-        // [vibrate, pause, vibrate, pause...]
-        vibrate: [100, 50, 100],
-
-        // Keep notification visible (don't auto-dismiss)
-        requireInteraction: false,
-
-        // Timestamp
-        timestamp: Date.now(),
-    };
-
     event.waitUntil(
-        self.registration.showNotification(data.title, notificationOptions),
+        self.registration.showNotification(payload.title, {
+            body: payload.body,
+            icon: payload.icon,
+            badge: payload.badge,
+            image: payload.image,
+            tag: payload.tag,
+            renotify: false,
+
+            data: {
+                url: payload.data.url,
+                notificationId: payload.data.notificationId,
+            },
+
+            actions: [
+                {
+                    action: "view",
+                    title: "View",
+                },
+                {
+                    action: "dismiss",
+                    title: "Dismiss",
+                },
+            ],
+
+            vibrate: [100, 50, 100],
+            requireInteraction: false,
+            timestamp: Date.now(),
+        }),
     );
 });
 
-// ━━━ NOTIFICATIONCLICK EVENT ━━━
-// Fires when user clicks the notification
-self.addEventListener("notificationclick", (event) => {
-    console.log("[SW] Notification clicked:", event.action);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// NOTIFICATION CLICK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    // Close the notification
+self.addEventListener("notificationclick", (event) => {
     event.notification.close();
 
-    // Handle dismiss action
-    if (event.action === "dismiss") return;
+    if (event.action === "dismiss") {
+        return;
+    }
 
-    const targetUrl = event.notification.data?.url || "/notifications";
-    const fullUrl = APP_URL + targetUrl;
+    let targetPath = "/notifications";
+
+    try {
+        const url = event.notification.data?.url;
+
+        if (url) {
+            const parsed = new URL(url, self.location.origin);
+
+            if (parsed.origin === self.location.origin) {
+                targetPath =
+                    parsed.pathname +
+                    parsed.search +
+                    parsed.hash;
+            }
+        }
+    } catch {
+        console.warn("[SW] Invalid notification URL");
+    }
+
+    const targetUrl = self.location.origin + targetPath;
 
     event.waitUntil(
-        // Try to focus existing tab first
         self.clients
             .matchAll({
                 type: "window",
                 includeUncontrolled: true,
             })
-            .then((clientList) => {
-                // Check if CampusX is already open in a tab
-                for (const client of clientList) {
-                    if (client.url.startsWith(APP_URL)) {
-                        // Focus that tab and navigate to URL
+            .then((clients) => {
+                for (const client of clients) {
+                    if (client.url.startsWith(self.location.origin)) {
                         return client.focus().then(() => {
-                            return client.navigate(fullUrl);
+                            if ("navigate" in client) {
+                                return client.navigate(targetUrl);
+                            }
                         });
                     }
                 }
 
-                // No tab open — open a new one
-                return self.clients.openWindow(fullUrl);
+                return self.clients.openWindow(targetUrl);
             }),
     );
 });
 
-// ━━━ NOTIFICATIONCLOSE EVENT ━━━
-// Fires when user dismisses notification (swipes away)
-self.addEventListener("notificationclose", (event) => {
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// NOTIFICATION CLOSE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+self.addEventListener("notificationclose", () => {
     console.log("[SW] Notification dismissed");
-    // Could track dismissal analytics here
 });
 
-// ━━━ PUSH SUBSCRIPTION CHANGE ━━━
-// Fires when subscription expires (rare but handle it)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SUBSCRIPTION CHANGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 self.addEventListener("pushsubscriptionchange", (event) => {
-    console.log("[SW] Subscription changed — re-subscribing");
-    // Re-subscribe will be handled by the client
-    // Just log for now
+    console.warn("[SW] Push subscription changed");
+
+    event.waitUntil(
+        self.clients
+            .matchAll({
+                type: "window",
+                includeUncontrolled: true,
+            })
+            .then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({
+                        type: "PUSH_SUBSCRIPTION_EXPIRED",
+                    });
+                });
+            }),
+    );
 });
