@@ -1,83 +1,91 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Sidebar from "@/components/layout/Sidebar"
-import RightPanel from "@/components/layout/RightPanel"
-import MobileNav from "@/components/layout/MobileNav"
-import MobileFAB from "@/components/layout/MobileFAB"
-import FeedRefreshButton from "@/components/feed/FeedRefreshButton"
-import { Toaster } from "@/components/ui/sonner"
-import VerificationBanner from "@/components/shared/VerificationBanner"
-import useUser from "@/hooks/useUser"
-import { NotificationProvider } from "@/context/NotificationContext"
-import { CatProvider } from "@/context/CatContext"
-import CustomCursor from "@/components/shared/FloatingCat"
-import CursorSelector from "@/components/shared/CursorSelector"
-import { usePushNotifications } from "@/hooks/usePushNotifications"
-import { useTabTitle } from "@/hooks/useTabTitle"
+import { usePathname } from "next/navigation";
+import Sidebar from "@/components/layout/Sidebar";
+import RightPanel from "@/components/layout/RightPanel";
+import MobileNav from "@/components/layout/MobileNav";
+import MobileFAB from "@/components/layout/MobileFAB";
+import FeedRefreshButton from "@/components/feed/FeedRefreshButton";
+import { Toaster } from "@/components/ui/sonner";
+import VerificationBanner from "@/components/shared/VerificationBanner";
+import useUser from "@/hooks/useUser";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { CatProvider } from "@/context/CatContext";
+import CustomCursor from "@/components/shared/FloatingCat";
+import CursorSelector from "@/components/shared/CursorSelector";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useTabTitle } from "@/hooks/useTabTitle";
 
 // Component to initialize tab title
 function TabTitleInitializer() {
-  useTabTitle()
-  return null
+    useTabTitle();
+    return null;
 }
 
 export default function MainLayout({ children }) {
-  const { user } = useUser()
-  const pathname = usePathname()
+    const { user } = useUser();
+    const pathname = usePathname();
 
-  // Register service worker and handle push permissions
-  usePushNotifications()
+    // Register service worker and handle push permissions
+    usePushNotifications();
 
-  // Check if we are inside a specific chat room
-  const isChatRoom = pathname.startsWith('/chats/') && pathname !== '/chats'
-  
-  // Check if we are in study rooms (list page or room page)
-  const isStudyRoom = pathname.startsWith('/study-rooms')
-  
-  // Check if we are on whiteboard (full screen mode)
-  const isWhiteboard = pathname === '/whiteboard'
+    // Check if we are inside a specific chat room
+    const isChatRoom = pathname.startsWith("/chats/") && pathname !== "/chats";
 
-  return (
-    <NotificationProvider>
-      <CatProvider>
-        <TabTitleInitializer />
-        <div className={`flex min-h-screen bg-zinc-950 text-foreground selection:bg-primary/20 overflow-hidden ${isWhiteboard ? 'fixed inset-0' : ''}`}>
-          {/* Fixed Left Sidebar - Hide for whiteboard */}
-          {!isWhiteboard && <Sidebar />}
+    // Check if we are in study rooms (list page or room page)
+    const isStudyRoom = pathname.startsWith("/study-rooms");
 
-          {/* Main Content Area */}
-          <main className={`flex-1 flex flex-col ${isWhiteboard ? 'm-0 w-screen h-screen' : 'md:ml-[72px] lg:ml-[280px]'} ${isStudyRoom || isWhiteboard ? '' : 'xl:mr-[350px]'} ${isChatRoom ? 'pb-0 h-[100dvh] overflow-hidden' : 'pb-20 min-h-screen'} md:pb-0 overflow-x-hidden`}>
-            {/* Broadcast banner — site-wide announcement */}
-            {/* Verification prompt for unverified students */}
-            {!isStudyRoom && !isWhiteboard && <VerificationBanner />}
+    // Check if we are on whiteboard (full screen mode)
+    const isWhiteboard = pathname === "/whiteboard";
 
-            <div className={`w-full ${isStudyRoom ? 'max-w-7xl mx-auto' : isWhiteboard ? '' : 'max-w-2xl border-x'} border-border ${isChatRoom ? 'flex-1 h-full overflow-hidden' : isWhiteboard ? 'flex-1 h-full' : 'min-h-screen'} bg-background/50 backdrop-blur-sm ${!isStudyRoom && !isWhiteboard ? 'self-center' : ''}`}>
-              {children}
-            </div>
-          </main>
+    return (
+        <NotificationProvider>
+            <CatProvider>
+                <TabTitleInitializer />
+                <div
+                    className={`flex min-h-screen bg-background text-foreground selection:bg-primary/20 overflow-hidden ${isWhiteboard ? "fixed inset-0" : ""}`}
+                >
+                    {/* Fixed Left Sidebar - Hide for whiteboard */}
+                    {!isWhiteboard && <Sidebar />}
 
-          {/* Fixed Right Panel - Hide for study rooms and whiteboard */}
-          {!isStudyRoom && !isWhiteboard && <RightPanel />}
+                    {/* Main Content Area */}
+                    <main
+                        className={`flex-1 flex flex-col ${isWhiteboard ? "m-0 w-screen h-screen" : "md:ml-[72px] lg:ml-[280px]"} ${isStudyRoom || isWhiteboard ? "" : "xl:mr-[350px]"} ${isChatRoom ? "pb-0 h-[100dvh] overflow-hidden" : "pb-20 min-h-screen"} md:pb-0 overflow-x-hidden`}
+                    >
+                        {/* Broadcast banner — site-wide announcement */}
+                        {/* Verification prompt for unverified students */}
+                        {!isStudyRoom && !isWhiteboard && (
+                            <VerificationBanner />
+                        )}
 
-          {/* Mobile Bottom Navigation — Hide in chat room */}
-          {!isChatRoom && <MobileNav />}
+                        <div
+                            className={`w-full ${isStudyRoom ? "max-w-7xl mx-auto" : isWhiteboard ? "" : "max-w-2xl border-x"} border-border ${isChatRoom ? "flex-1 h-full overflow-hidden" : isWhiteboard ? "flex-1 h-full" : "min-h-screen"} bg-background/50 backdrop-blur-sm ${!isStudyRoom && !isWhiteboard ? "self-center" : ""}`}
+                        >
+                            {children}
+                        </div>
+                    </main>
 
-          {/* Mobile Floating Action Button — Hide in chat room */}
-          {!isChatRoom && <MobileFAB />}
+                    {/* Fixed Right Panel - Hide for study rooms and whiteboard */}
+                    {!isStudyRoom && !isWhiteboard && <RightPanel />}
 
-          {/* Feed Refresh Button — Only on feed page */}
-          {pathname === '/feed' && <FeedRefreshButton />}
+                    {/* Mobile Bottom Navigation — Hide in chat room */}
+                    {!isChatRoom && <MobileNav />}
 
-          {/* Custom Cursor */}
-          {!isWhiteboard && <CustomCursor />}
-          {/* Cursor Selector Popup */}
-          <CursorSelector />
+                    {/* Mobile Floating Action Button — Hide in chat room */}
+                    {!isChatRoom && <MobileFAB />}
 
-          {/* Toast Notifications */}
-          <Toaster position="bottom-center" />
-        </div>
-      </CatProvider>
-    </NotificationProvider>
-  )
+                    {/* Feed Refresh Button — Only on feed page */}
+                    {pathname === "/feed" && <FeedRefreshButton />}
+
+                    {/* Custom Cursor */}
+                    {!isWhiteboard && <CustomCursor />}
+                    {/* Cursor Selector Popup */}
+                    <CursorSelector />
+
+                    {/* Toast Notifications */}
+                    <Toaster position="bottom-center" />
+                </div>
+            </CatProvider>
+        </NotificationProvider>
+    );
 }
