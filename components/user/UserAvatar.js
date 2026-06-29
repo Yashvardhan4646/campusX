@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/context/ThemeContext"
 
 const UserAvatar = memo(function UserAvatar({ user, size = 'md', className }) {
   const sizeClasses = {
@@ -12,12 +13,19 @@ const UserAvatar = memo(function UserAvatar({ user, size = 'md', className }) {
     lg: 'h-12 w-12',
     xl: 'h-16 w-16'
   }
+  const { theme } = useTheme()
+  const isCustomTheme = theme && !['light', 'dark'].includes(theme)
 
   return (
-    <Avatar className={cn(sizeClasses[size] || sizeClasses.md, className)}>
-      <AvatarImage src={user?.avatar} alt={user?.name} />
-      <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
-    </Avatar>
+    <div className={cn("relative", sizeClasses[size] || sizeClasses.md)}>
+      {user?.isPro && (
+        <div className="absolute inset-0 rounded-full p-0.5 bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
+      )}
+      <Avatar className={cn(sizeClasses[size] || sizeClasses.md, className, user?.isPro && "border-2 border-background")}>
+        <AvatarImage src={user?.avatar} alt={user?.name} />
+        <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+      </Avatar>
+    </div>
   )
 })
 

@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Camera, AlertCircle } from "lucide-react";
+import { Loader2, Camera, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiSelect } from "@/components/shared/MultiSelect";
 
@@ -166,6 +166,45 @@ export default function EditProfileDrawer({
         }
     };
 
+    const handleDeleteAvatar = async (e) => {
+        e.stopPropagation();
+        setUploadingAvatar(true);
+        try {
+            const res = await fetch("/api/users/avatar", {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                toast.success("Avatar deleted!");
+                setAvatarPreview(null);
+                // Let parent know about the change
+                onSave({ ...user, avatar: null });
+            } else throw new Error("Failed to delete avatar");
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
+    const handleDeleteBanner = async (e) => {
+        e.stopPropagation();
+        setUploadingBanner(true);
+        try {
+            const res = await fetch("/api/users/banner", {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                toast.success("Banner deleted!");
+                setBannerPreview(null);
+                onSave({ ...user, banner: null });
+            } else throw new Error("Failed to delete banner");
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setUploadingBanner(false);
+        }
+    };
+
     const handleSave = async () => {
         const trimmedName = name.trim();
         if (trimmedName.length < 2) {
@@ -224,37 +263,48 @@ export default function EditProfileDrawer({
                 </SheetHeader>
 
                 {/* Banner */}
-                <div
-                    className="relative group cursor-pointer"
-                    onClick={triggerBannerFileInput}
-                >
-                    <div className="w-full h-32 bg-accent border-b border-border relative overflow-hidden">
-                        {bannerPreview || user?.banner ? (
-                            <Image
-                                src={bannerPreview || user.banner}
-                                alt="Banner"
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500/20 to-purple-500/20">
-                                <div className="text-center">
-                                    <Camera className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground">
-                                        Add a banner
-                                    </p>
+                <div className="relative">
+                    <div
+                        className="relative group cursor-pointer"
+                        onClick={triggerBannerFileInput}
+                    >
+                        <div className="w-full h-32 bg-accent border-b border-border relative overflow-hidden">
+                            {bannerPreview || user?.banner ? (
+                                <Image
+                                    src={bannerPreview || user.banner}
+                                    alt="Banner"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500/20 to-purple-500/20">
+                                    <div className="text-center">
+                                        <Camera className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                                        <p className="text-sm text-muted-foreground">
+                                            Add a banner
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            {uploadingBanner ? (
+                                <Loader2 className="w-6 h-6 animate-spin text-white" />
+                            ) : (
+                                <Camera className="w-6 h-6 text-white" />
+                            )}
+                        </div>
                     </div>
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        {uploadingBanner ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-white" />
-                        ) : (
-                            <Camera className="w-6 h-6 text-white" />
-                        )}
-                    </div>
+                    {(bannerPreview || user?.banner) && (
+                        <button
+                            onClick={handleDeleteBanner}
+                            disabled={uploadingBanner || saving}
+                            className="absolute top-2 right-2 bg-destructive text-white rounded-full p-1 hover:opacity-80 transition-opacity"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
                     <input
                         ref={bannerFileInputRef}
                         type="file"
@@ -271,32 +321,43 @@ export default function EditProfileDrawer({
 
                 {/* Avatar */}
                 <div className="flex flex-col items-center py-5 border-b border-border">
-                    <div
-                        className="relative group cursor-pointer"
-                        onClick={triggerFileInput}
-                    >
-                        <div className="w-20 h-20 rounded-full overflow-hidden bg-accent border-2 border-border relative flex items-center justify-center">
-                            {avatarPreview || user?.avatar ? (
-                                <Image
-                                    src={avatarPreview || user.avatar}
-                                    alt="Avatar"
-                                    width={80}
-                                    height={80}
-                                    className="object-cover w-full h-full"
-                                />
-                            ) : (
-                                <span className="text-2xl font-bold text-muted-foreground">
-                                    {user?.name?.[0]?.toUpperCase()}
-                                </span>
-                            )}
+                    <div className="relative">
+                        <div
+                            className="relative group cursor-pointer"
+                            onClick={triggerFileInput}
+                        >
+                            <div className="w-20 h-20 rounded-full overflow-hidden bg-accent border-2 border-border relative flex items-center justify-center">
+                                {avatarPreview || user?.avatar ? (
+                                    <Image
+                                        src={avatarPreview || user.avatar}
+                                        alt="Avatar"
+                                        width={80}
+                                        height={80}
+                                        className="object-cover w-full h-full"
+                                    />
+                                ) : (
+                                    <span className="text-2xl font-bold text-muted-foreground">
+                                        {user?.name?.[0]?.toUpperCase()}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                {uploadingAvatar ? (
+                                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                                ) : (
+                                    <Camera className="w-5 h-5 text-white" />
+                                )}
+                            </div>
                         </div>
-                        <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            {uploadingAvatar ? (
-                                <Loader2 className="w-5 h-5 animate-spin text-white" />
-                            ) : (
-                                <Camera className="w-5 h-5 text-white" />
-                            )}
-                        </div>
+                        {(avatarPreview || user?.avatar) && (
+                            <button
+                                onClick={handleDeleteAvatar}
+                                disabled={uploadingAvatar || saving}
+                                className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-1 hover:opacity-80 transition-opacity"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-2">
                         Click to change · JPG, PNG, WebP · 5MB max

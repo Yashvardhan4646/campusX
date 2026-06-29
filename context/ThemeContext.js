@@ -1,0 +1,632 @@
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+
+const ThemeContext = createContext({
+    theme: "light",
+    setTheme: () => {},
+    toggleTheme: () => {},
+    customThemes: [],
+    addCustomTheme: () => {},
+    deleteCustomTheme: () => {},
+    editCustomTheme: () => {},
+});
+
+// PREMIUM THEME PRESETS
+export const PREMIUM_THEMES = [
+    {
+        id: "nebula",
+        name: "Nebula",
+        colors: {
+            primary: "#a855f7",
+            background: "#0f0a1a",
+            foreground: "#f8fafc",
+            card: "#1a122b",
+            cardForeground: "#f8fafc",
+            muted: "#251a3d",
+            mutedForeground: "#94a3b8",
+            accent: "#2d1b4e",
+            accentForeground: "#f8fafc",
+            border: "#3e2a66",
+        },
+        isPremium: true,
+    },
+    {
+        id: "sunset",
+        name: "Sunset",
+        colors: {
+            primary: "#f97316",
+            background: "#1a0f0a",
+            foreground: "#fff7ed",
+            card: "#2a1410",
+            cardForeground: "#fff7ed",
+            muted: "#3d1a12",
+            mutedForeground: "#fed7aa",
+            accent: "#4e1f15",
+            accentForeground: "#fff7ed",
+            border: "#662a1e",
+        },
+        isPremium: true,
+    },
+    {
+        id: "cyberpunk",
+        name: "Cyberpunk",
+        colors: {
+            primary: "#06b6d4",
+            background: "#0a0a12",
+            foreground: "#f0f9ff",
+            card: "#121223",
+            cardForeground: "#f0f9ff",
+            muted: "#1a1a33",
+            mutedForeground: "#7dd3fc",
+            accent: "#222244",
+            accentForeground: "#f0f9ff",
+            border: "#333366",
+        },
+        isPremium: true,
+    },
+    {
+        id: "forest",
+        name: "Forest",
+        colors: {
+            primary: "#10b981",
+            background: "#0a120a",
+            foreground: "#ecfdf5",
+            card: "#102010",
+            cardForeground: "#ecfdf5",
+            muted: "#1a331a",
+            mutedForeground: "#86efac",
+            accent: "#224422",
+            accentForeground: "#ecfdf5",
+            border: "#336633",
+        },
+        isPremium: true,
+    },
+    {
+        id: "obsidian",
+        name: "Obsidian",
+        colors: {
+            primary: "#8B7CFF",
+            background: "#0B0C10",
+            foreground: "#F6F7FB",
+            card: "#14161C",
+            cardForeground: "#F6F7FB",
+            muted: "#1D212A",
+            mutedForeground: "#A4ADBC",
+            accent: "#252B38",
+            accentForeground: "#FFFFFF",
+            border: "#2F3645",
+        },
+        isPremium: true,
+    },
+    {
+        id: "bordeaux",
+        name: "Bordeaux",
+        colors: {
+            primary: "#D85C7A",
+            background: "#130D11",
+            foreground: "#FAF5F7",
+            card: "#1C1519",
+            cardForeground: "#FAF5F7",
+            muted: "#2C2328",
+            mutedForeground: "#C1AAB3",
+            accent: "#433039",
+            accentForeground: "#FFFFFF",
+            border: "#5A434C",
+        },
+        isPremium: true,
+    },
+    {
+        id: "arctic",
+        name: "Arctic",
+        colors: {
+            primary: "#69A7FF",
+            background: "#0E1723",
+            foreground: "#F6FAFF",
+            card: "#172230",
+            cardForeground: "#F6FAFF",
+            muted: "#233244",
+            mutedForeground: "#A3B6CA",
+            accent: "#2D425A",
+            accentForeground: "#FFFFFF",
+            border: "#3F5772",
+        },
+        isPremium: true,
+    },
+    {
+        id: "emerald-noir",
+        name: "Emerald Noir",
+        colors: {
+            primary: "#3FCF9B",
+            background: "#09120F",
+            foreground: "#F3FCF8",
+            card: "#121D19",
+            cardForeground: "#F3FCF8",
+            muted: "#1D2F28",
+            mutedForeground: "#9CB7AD",
+            accent: "#284139",
+            accentForeground: "#FFFFFF",
+            border: "#37544A",
+        },
+        isPremium: true,
+    },
+    {
+        id: "royal",
+        name: "Royal",
+        colors: {
+            primary: "#9A7CFF",
+            background: "#120F1E",
+            foreground: "#F8F7FD",
+            card: "#1B1830",
+            cardForeground: "#F8F7FD",
+            muted: "#292344",
+            mutedForeground: "#AEA7CB",
+            accent: "#39315D",
+            accentForeground: "#FFFFFF",
+            border: "#4D4378",
+        },
+        isPremium: true,
+    },
+    {
+        id: "walnut",
+        name: "Walnut",
+        colors: {
+            primary: "#D8A06A",
+            background: "#171311",
+            foreground: "#F8F3EE",
+            card: "#221B18",
+            cardForeground: "#F8F3EE",
+            muted: "#302724",
+            mutedForeground: "#BBAAA0",
+            accent: "#43342D",
+            accentForeground: "#FFF9F5",
+            border: "#56453D",
+        },
+        isPremium: true,
+    },
+    {
+        id: "rose-gold",
+        name: "Rose Gold",
+        colors: {
+            primary: "#F28AAE",
+            background: "#171114",
+            foreground: "#FFF8FA",
+            card: "#22181D",
+            cardForeground: "#FFF8FA",
+            muted: "#32252C",
+            mutedForeground: "#C6AAB6",
+            accent: "#47323D",
+            accentForeground: "#FFFFFF",
+            border: "#5D4350",
+        },
+        isPremium: true,
+    },
+    {
+        id: "midnight",
+        name: "Midnight",
+        colors: {
+            primary: "#5E8CFF",
+            background: "#0A101A",
+            foreground: "#F5F8FD",
+            card: "#121A26",
+            cardForeground: "#F5F8FD",
+            muted: "#1D2838",
+            mutedForeground: "#A3B0C4",
+            accent: "#29384C",
+            accentForeground: "#FFFFFF",
+            border: "#3A4B63",
+        },
+        isPremium: true,
+    },
+    {
+        id: "graphite",
+        name: "Graphite",
+        colors: {
+            primary: "#8FA4C7",
+            background: "#111214",
+            foreground: "#F5F5F4",
+            card: "#181A1F",
+            cardForeground: "#F5F5F4",
+            muted: "#23262C",
+            mutedForeground: "#A1A1AA",
+            accent: "#2D313A",
+            accentForeground: "#FFFFFF",
+            border: "#3D424D",
+        },
+        isPremium: true,
+    },
+    {
+        id: "aurora",
+        name: "Aurora",
+        colors: {
+            primary: "#62D6C8",
+            background: "#0A1014",
+            foreground: "#F4FBFC",
+            card: "#131D24",
+            cardForeground: "#F4FBFC",
+            muted: "#1D2C35",
+            mutedForeground: "#A0B8BE",
+            accent: "#27404B",
+            accentForeground: "#FFFFFF",
+            border: "#395562",
+        },
+        isPremium: true,
+    },
+    {
+        id: "ivory",
+        name: "Ivory",
+        colors: {
+            primary: "#B8864A",
+            background: "#FAF7F2",
+            foreground: "#2B241D",
+            card: "#FFFFFF",
+            cardForeground: "#2B241D",
+            muted: "#F1E8DD",
+            mutedForeground: "#7A6A5C",
+            accent: "#F6E2CA",
+            accentForeground: "#8A531C",
+            border: "#E4D5C4",
+        },
+        isPremium: true,
+    },
+    {
+        id: "arctic-light",
+        name: "Arctic",
+        colors: {
+            primary: "#4C7EFF",
+            background: "#F5F9FF",
+            foreground: "#182433",
+            card: "#FFFFFF",
+            cardForeground: "#182433",
+            muted: "#EAF1FB",
+            mutedForeground: "#64748B",
+            accent: "#DCE9FF",
+            accentForeground: "#2952C8",
+            border: "#D5E0EF",
+        },
+        isPremium: true,
+    },
+    {
+        id: "sage",
+        name: "Sage",
+        colors: {
+            primary: "#3FAE8D",
+            background: "#F4FAF6",
+            foreground: "#1F2C28",
+            card: "#FFFFFF",
+            cardForeground: "#1F2C28",
+            muted: "#E6F2EC",
+            mutedForeground: "#70857C",
+            accent: "#D9F0E4",
+            accentForeground: "#22634D",
+            border: "#CBDDD4",
+        },
+        isPremium: true,
+    },
+    {
+        id: "lavender",
+        name: "Lavender",
+        colors: {
+            primary: "#7C6CFF",
+            background: "#FBFAFF",
+            foreground: "#2B2440",
+            card: "#FFFFFF",
+            cardForeground: "#2B2440",
+            muted: "#F1EDFA",
+            mutedForeground: "#786F92",
+            accent: "#E8DFFF",
+            accentForeground: "#5B42CC",
+            border: "#DED5F3",
+        },
+        isPremium: true,
+    },
+    {
+        id: "mist",
+        name: "Mist",
+        colors: {
+            primary: "#5F8DFF",
+            background: "#F7F8FA",
+            foreground: "#1F2937",
+            card: "#FFFFFF",
+            cardForeground: "#1F2937",
+            muted: "#ECEFF3",
+            mutedForeground: "#6B7280",
+            accent: "#E4EBFF",
+            accentForeground: "#3654C5",
+            border: "#D8DEE8",
+        },
+        isPremium: true,
+    },
+    {
+        id: "champagne",
+        name: "Champagne",
+        colors: {
+            primary: "#C69258",
+            background: "#FCF8F2",
+            foreground: "#2F271F",
+            card: "#FFFFFF",
+            cardForeground: "#2F271F",
+            muted: "#F3EBDF",
+            mutedForeground: "#78695A",
+            accent: "#F8E3C8",
+            accentForeground: "#8B551D",
+            border: "#E7D8C7",
+        },
+        isPremium: true,
+    },
+    {
+        id: "pearl",
+        name: "Pearl",
+        colors: {
+            primary: "#6B82FF",
+            background: "#F9FAFC",
+            foreground: "#202938",
+            card: "#FFFFFF",
+            cardForeground: "#202938",
+            muted: "#EEF1F5",
+            mutedForeground: "#6E7788",
+            accent: "#E2E9FF",
+            accentForeground: "#3B57C6",
+            border: "#DCE2EB",
+        },
+        isPremium: true,
+    },
+    {
+        id: "blush",
+        name: "Blush",
+        colors: {
+            primary: "#E97A9A",
+            background: "#FFF9FB",
+            foreground: "#382630",
+            card: "#FFFFFF",
+            cardForeground: "#382630",
+            muted: "#F8EDF2",
+            mutedForeground: "#8A6F7B",
+            accent: "#FFE1EB",
+            accentForeground: "#B33B67",
+            border: "#ECD7E0",
+        },
+        isPremium: true,
+    },
+    {
+        id: "mint",
+        name: "Mint",
+        colors: {
+            primary: "#31B99A",
+            background: "#F5FCFA",
+            foreground: "#1C2E2A",
+            card: "#FFFFFF",
+            cardForeground: "#1C2E2A",
+            muted: "#E7F5F1",
+            mutedForeground: "#6C857D",
+            accent: "#D5F3E8",
+            accentForeground: "#1D755B",
+            border: "#CBE3DA",
+        },
+        isPremium: true,
+    },
+    {
+        id: "sky",
+        name: "Sky",
+        colors: {
+            primary: "#4F80FF",
+            background: "#F4F9FF",
+            foreground: "#1D2938",
+            card: "#FFFFFF",
+            cardForeground: "#1D2938",
+            muted: "#E7F0FB",
+            mutedForeground: "#66788E",
+            accent: "#D8E8FF",
+            accentForeground: "#2C58C5",
+            border: "#D0DCEB",
+        },
+        isPremium: true,
+    },
+];
+
+function hexToHsl(hex) {
+    let r = parseInt(hex.slice(1, 3), 16) / 255;
+    let g = parseInt(hex.slice(3, 5), 16) / 255;
+    let b = parseInt(hex.slice(5, 7), 16) / 255;
+
+    let max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    let h,
+        s,
+        l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
+        }
+        h /= 6;
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
+export function ThemeProvider({ children }) {
+    const [theme, setThemeState] = useState(undefined);
+    const [customThemes, setCustomThemes] = useState([]);
+
+    // Initialize custom themes and selected theme
+    useEffect(() => {
+        const storedCustomThemes = localStorage.getItem("customThemes");
+        if (storedCustomThemes) {
+            setCustomThemes(JSON.parse(storedCustomThemes));
+        }
+
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme) {
+            setThemeState(storedTheme);
+        } else {
+            const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)",
+            ).matches;
+            setThemeState(prefersDark ? "dark" : "light");
+        }
+    }, []);
+
+    // Apply theme styles
+    useEffect(() => {
+        if (!theme) return;
+
+        const root = window.document.documentElement;
+
+        // Remove all theme classes and custom styles
+        root.classList.remove("light", "dark");
+        root.style.removeProperty("--background");
+        root.style.removeProperty("--foreground");
+        root.style.removeProperty("--card");
+        root.style.removeProperty("--card-foreground");
+        root.style.removeProperty("--popover");
+        root.style.removeProperty("--popover-foreground");
+        root.style.removeProperty("--primary");
+        root.style.removeProperty("--primary-foreground");
+        root.style.removeProperty("--secondary");
+        root.style.removeProperty("--secondary-foreground");
+        root.style.removeProperty("--muted");
+        root.style.removeProperty("--muted-foreground");
+        root.style.removeProperty("--accent");
+        root.style.removeProperty("--accent-foreground");
+        root.style.removeProperty("--destructive");
+        root.style.removeProperty("--destructive-foreground");
+        root.style.removeProperty("--border");
+        root.style.removeProperty("--input");
+        root.style.removeProperty("--ring");
+
+        if (theme === "light" || theme === "dark") {
+            root.classList.add(theme);
+        } else {
+            // Apply custom theme
+            const customTheme = customThemes.find((t) => t.id === theme);
+            if (customTheme) {
+                const primaryHsl = hexToHsl(customTheme.colors.primary);
+                const bgHsl = hexToHsl(customTheme.colors.background);
+                const fgHsl = hexToHsl(customTheme.colors.foreground);
+                const cardHsl = hexToHsl(customTheme.colors.card);
+                const cardFgHsl = hexToHsl(customTheme.colors.cardForeground);
+                const mutedHsl = hexToHsl(customTheme.colors.muted);
+                const mutedFgHsl = hexToHsl(customTheme.colors.mutedForeground);
+                const accentHsl = hexToHsl(customTheme.colors.accent);
+                const accentFgHsl = hexToHsl(
+                    customTheme.colors.accentForeground,
+                );
+                const borderHsl = hexToHsl(customTheme.colors.border);
+                const destructiveHsl = hexToHsl("#ef4444");
+                const destructiveFgHsl = hexToHsl("#ffffff");
+
+                root.style.setProperty("--background", bgHsl);
+                root.style.setProperty("--foreground", fgHsl);
+                root.style.setProperty("--card", cardHsl);
+                root.style.setProperty("--card-foreground", cardFgHsl);
+                root.style.setProperty("--popover", cardHsl);
+                root.style.setProperty("--popover-foreground", cardFgHsl);
+                root.style.setProperty("--primary", primaryHsl);
+                root.style.setProperty("--primary-foreground", bgHsl);
+                root.style.setProperty("--secondary", mutedHsl);
+                root.style.setProperty("--secondary-foreground", fgHsl);
+                root.style.setProperty("--muted", mutedHsl);
+                root.style.setProperty("--muted-foreground", mutedFgHsl);
+                root.style.setProperty("--accent", accentHsl);
+                root.style.setProperty("--accent-foreground", accentFgHsl);
+                root.style.setProperty("--destructive", destructiveHsl);
+                root.style.setProperty(
+                    "--destructive-foreground",
+                    destructiveFgHsl,
+                );
+                root.style.setProperty("--border", borderHsl);
+                root.style.setProperty("--input", borderHsl);
+                root.style.setProperty("--ring", primaryHsl);
+            }
+        }
+    }, [theme, customThemes]);
+
+    // Listen for system theme changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = () => {
+            if (!localStorage.getItem("theme")) {
+                setThemeState(mediaQuery.matches ? "dark" : "light");
+            }
+        };
+
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, []);
+
+    const setTheme = (newTheme) => {
+        localStorage.setItem("theme", newTheme);
+        setThemeState(newTheme);
+    };
+
+    const toggleTheme = () => {
+        if (theme === "dark") {
+            setTheme("light");
+        } else if (theme === "light") {
+            setTheme("dark");
+        } else {
+            setTheme("light");
+        }
+    };
+
+    const addCustomTheme = (newTheme) => {
+        const updated = [...customThemes, newTheme];
+        setCustomThemes(updated);
+        localStorage.setItem("customThemes", JSON.stringify(updated));
+    };
+
+    const deleteCustomTheme = (themeId) => {
+        const updated = customThemes.filter((t) => t.id !== themeId);
+        setCustomThemes(updated);
+        localStorage.setItem("customThemes", JSON.stringify(updated));
+
+        if (theme === themeId) {
+            setTheme("light");
+        }
+    };
+
+    const editCustomTheme = (updatedTheme) => {
+        const updated = customThemes.map((t) =>
+            t.id === updatedTheme.id ? updatedTheme : t,
+        );
+        setCustomThemes(updated);
+        localStorage.setItem("customThemes", JSON.stringify(updated));
+    };
+
+    return (
+        <ThemeContext.Provider
+            value={{
+                theme,
+                setTheme,
+                toggleTheme,
+                customThemes,
+                addCustomTheme,
+                deleteCustomTheme,
+                editCustomTheme,
+            }}
+        >
+            {children}
+        </ThemeContext.Provider>
+    );
+}
+
+export function useTheme() {
+    const context = useContext(ThemeContext);
+    if (context === undefined) {
+        throw new Error("useTheme must be used within a ThemeProvider");
+    }
+    return context;
+}
