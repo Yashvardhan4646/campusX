@@ -64,3 +64,32 @@ export async function POST(request) {
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const currentUser = await getCurrentUser(request)
+    if (!currentUser) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    await connectDB()
+
+    // Update user in database to remove avatar
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser._id,
+      { $unset: { avatar: "" } },
+      { new: true }
+    )
+
+    if (!updatedUser) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ 
+      message: 'Avatar deleted successfully'
+    })
+  } catch (error) {
+    console.error('Avatar delete route error:', error)
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+  }
+}
