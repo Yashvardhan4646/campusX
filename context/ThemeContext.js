@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const ThemeContext = createContext({
     theme: "light",
@@ -460,6 +461,15 @@ function hexToHsl(hex) {
 export function ThemeProvider({ children }) {
     const [theme, setThemeState] = useState(undefined);
     const [customThemes, setCustomThemes] = useState([]);
+    const pathname = usePathname();
+
+    // Check if route is public or auth
+    const isPublicOrAuthRoute = pathname === '/' || 
+        pathname.startsWith('/login') || 
+        pathname.startsWith('/signup') || 
+        pathname.startsWith('/privacy') || 
+        pathname.startsWith('/terms') ||
+        pathname.startsWith('/forgot-password');
 
     // Initialize custom themes and selected theme
     useEffect(() => {
@@ -484,6 +494,33 @@ export function ThemeProvider({ children }) {
         if (!theme) return;
 
         const root = window.document.documentElement;
+
+        if (isPublicOrAuthRoute) {
+            // Force dark mode for public/auth routes
+            root.classList.remove("light");
+            root.classList.add("dark");
+            // Remove any custom theme styles
+            root.style.removeProperty("--background");
+            root.style.removeProperty("--foreground");
+            root.style.removeProperty("--card");
+            root.style.removeProperty("--card-foreground");
+            root.style.removeProperty("--popover");
+            root.style.removeProperty("--popover-foreground");
+            root.style.removeProperty("--primary");
+            root.style.removeProperty("--primary-foreground");
+            root.style.removeProperty("--secondary");
+            root.style.removeProperty("--secondary-foreground");
+            root.style.removeProperty("--muted");
+            root.style.removeProperty("--muted-foreground");
+            root.style.removeProperty("--accent");
+            root.style.removeProperty("--accent-foreground");
+            root.style.removeProperty("--destructive");
+            root.style.removeProperty("--destructive-foreground");
+            root.style.removeProperty("--border");
+            root.style.removeProperty("--input");
+            root.style.removeProperty("--ring");
+            return;
+        }
 
         // Remove all theme classes and custom styles
         root.classList.remove("light", "dark");
@@ -552,7 +589,7 @@ export function ThemeProvider({ children }) {
                 root.style.setProperty("--ring", primaryHsl);
             }
         }
-    }, [theme, customThemes]);
+    }, [theme, customThemes, isPublicOrAuthRoute]);
 
     // Listen for system theme changes
     useEffect(() => {

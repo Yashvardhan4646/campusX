@@ -6,8 +6,6 @@ import { triggerPusher } from '@/lib/pusher-server'
 import { validateObjectId } from '@/utils/validators'
 import { sanitizeMongoInput } from '@/lib/sanitize'
 
-const ALLOWED_EMOJIS = ['❤️', '😂', '👍', '🔥', '😮', '😢','🥀']
-
 /**
  * POST /api/groups/[groupId]/messages/[messageId]/react - Add/remove reaction
  */
@@ -33,8 +31,8 @@ export async function POST(request, { params }) {
 
     const { emoji } = sanitizeMongoInput(body)
 
-    // 1. Validate emoji is in allowed list
-    if (!emoji || !ALLOWED_EMOJIS.includes(emoji)) {
+    // 1. Validate emoji is a single emoji character
+    if (!emoji || !/\p{Emoji}/u.test(emoji)) {
       return NextResponse.json({ message: 'Invalid reaction emoji' }, { status: 400 })
     }
 
