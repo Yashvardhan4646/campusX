@@ -20,6 +20,7 @@ import useUser from "@/hooks/useUser";
 import { usePosts } from "@/hooks/usePosts";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import InfiniteScrollSentinel from "@/components/shared/InfiniteScrollSentinel";
+import { useTheme } from "@/context/ThemeContext";
 // Removed isFounder
 import { renderContentWithMentions } from "@/utils/hashtags";
 import UserMention from "@/components/shared/UserMention";
@@ -177,17 +178,33 @@ export default function ProfileClient({ username: initialUsername }) {
             {/* Header */}
             <div className="flex flex-col">
                 <div className="h-32 relative overflow-hidden">
-                    <Image
-                        src={getBannerUrl(
-                            profileUser?.banner,
-                            profileUser?.username,
-                        )}
-                        alt={`${profileUser?.name}'s banner`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        priority
-                    />
+                    {profileUser?.banner ? (
+                        <Image
+                            src={getBannerUrl(
+                                profileUser?.banner,
+                                profileUser?.username,
+                            )}
+                            alt={`${profileUser?.name}'s banner`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority
+                        />
+                    ) : profileUser?.isPro ? (
+                        <div className="absolute inset-0 animate-gradient" />
+                    ) : (
+                        <Image
+                            src={getBannerUrl(
+                                profileUser?.banner,
+                                profileUser?.username,
+                            )}
+                            alt={`${profileUser?.name}'s banner`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority
+                        />
+                    )}
                 </div>
 
                 <div className="px-4 pb-4">
@@ -468,6 +485,25 @@ export default function ProfileClient({ username: initialUsername }) {
                                         ),
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* Exclusive Theme Widget for Premium */}
+                    {profileUser.isPro && (
+                        <div className="mt-6">
+                            <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center text-white text-lg">
+                                        🎨
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-sm">Theme Master</h4>
+                                        <p className="text-xs text-muted-foreground">
+                                            Customizing their CampusZen experience
+                                        </p>
+                                    </div>
+                                </div>
+                            </Card>
                         </div>
                     )}
 
