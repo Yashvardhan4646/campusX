@@ -1,49 +1,59 @@
-import { ShieldCheck, CheckCircle2 } from "lucide-react"
+import { Check } from "lucide-react";
 
-export default function VerifiedBadge({ 
-  size = "sm", 
-  showText = false, 
-  verificationType = "id_card",
-  className = ""
+export default function VerifiedBadge({
+    size = "sm",
+    verificationType = "id_card",
+    className = "",
 }) {
-  // Config mapping based on sizes
-  const config = {
-    sm: {
-      iconSize: "w-3.5 h-3.5",
-      textSize: "text-[10px]",
-      containerSize: "gap-1",
-      icon: CheckCircle2
-    },
-    md: {
-      iconSize: "w-[18px] h-[18px]",
-      textSize: "text-xs",
-      containerSize: "gap-1.5",
-      icon: ShieldCheck
-    },
-    lg: {
-      iconSize: "w-[22px] h-[22px]",
-      textSize: "text-sm font-semibold",
-      containerSize: "gap-2",
-      icon: ShieldCheck
-    }
-  }
+    const config = {
+        sm: {
+            badge: "w-4 h-4",
+            icon: "w-2.5 h-2.5",
+        },
+        md: {
+            badge: "w-5 h-5",
+            icon: "w-3 h-3",
+        },
+        lg: {
+            badge: "w-6 h-6",
+            icon: "w-3.5 h-3.5",
+        },
+    };
 
-  const { iconSize, textSize, containerSize, icon: Icon } = config[size] || config.sm
+    const { badge, icon } = config[size] || config.sm;
 
-  // Tooltip/title configuration
-  const titleText = verificationType === "college_email" 
-    ? "Verified via College Email 🎓"
-    : "Verified Student 🎓"
+    const title =
+        verificationType === "college_email"
+            ? "Verified via College Email"
+            : "Verified Student";
 
-  return (
-    <div 
-      className={`inline-flex items-center text-green-500 ${containerSize} ${className}`}
-      title={titleText}
-    >
-      <Icon className={`${iconSize} flex-shrink-0`} />
-      {showText && (
-        <span className={textSize}>Verified</span>
-      )}
-    </div>
-  )
+    return (
+        <span
+            title={title}
+            className={`inline-flex items-center ${className}`}
+        >
+            <span
+                className={`
+                    ${badge}
+                    inline-flex items-center justify-center
+                    rounded-full
+                    bg-gradient-to-b
+                    from-sky-400
+                    via-sky-500
+                    to-blue-600
+                    border border-white/20
+                    shadow-[0_2px_8px_rgba(37,99,235,0.45)]
+                    transition-transform duration-200
+                    hover:scale-105
+                `}
+            >
+                <Check
+                    className={`${icon} text-white`}
+                    strokeWidth={3.8}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </span>
+        </span>
+    );
 }
