@@ -79,12 +79,6 @@ export default function BillingPage() {
                 <p className="text-muted-foreground text-sm">
                     Manage your subscription and redeem promo codes
                 </p>
-                <Button
-                    onClick={() => toast.success("Test toast is working!")}
-                    variant="secondary"
-                >
-                    Test Toast
-                </Button>
             </div>
 
             {/* Current Subscription */}

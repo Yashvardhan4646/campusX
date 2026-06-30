@@ -479,7 +479,7 @@ export default function ProfileClient({ username: initialUsername }) {
 
                     {/* Gamification Stats */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-                        <Card className="p-3 bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
+                        <Card className="p-3 bg-accent/30 dark:bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mb-1">
                                 <Zap className="w-4 h-4 text-primary fill-primary" />
                             </div>
@@ -491,7 +491,7 @@ export default function ProfileClient({ username: initialUsername }) {
                             </span>
                         </Card>
 
-                        <Card className="p-3 bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
+                        <Card className="p-3 bg-accent/30 dark:bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
                             <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center mb-1">
                                 <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
                             </div>
@@ -503,7 +503,7 @@ export default function ProfileClient({ username: initialUsername }) {
                             </span>
                         </Card>
 
-                        <Card className="p-3 bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
+                        <Card className="p-3 bg-accent/30 dark:bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
                             <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center mb-1">
                                 <Trophy className="w-4 h-4 text-yellow-500" />
                             </div>
@@ -515,7 +515,7 @@ export default function ProfileClient({ username: initialUsername }) {
                             </span>
                         </Card>
 
-                        <Card className="p-3 bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
+                        <Card className="p-3 bg-accent/30 dark:bg-zinc-900/40 border-border/50 flex flex-col items-center justify-center text-center">
                             <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center mb-1">
                                 <Medal className="w-4 h-4 text-purple-500" />
                             </div>
@@ -542,7 +542,7 @@ export default function ProfileClient({ username: initialUsername }) {
                                             <Badge
                                                 key={i}
                                                 variant="outline"
-                                                className="bg-zinc-900/50 border-primary/20 hover:border-primary/50 transition-colors py-1.5 px-3 rounded-full flex items-center gap-2"
+                                                className="bg-accent/20 dark:bg-zinc-900/50 border-primary/20 hover:border-primary/50 transition-colors py-1.5 px-3 rounded-full flex items-center gap-2"
                                             >
                                                 <span>{b.badgeId.icon}</span>
                                                 <span className="text-xs font-semibold">

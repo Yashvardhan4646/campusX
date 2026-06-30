@@ -23,7 +23,7 @@ export const BentoGridItem = ({
     return (
         <div
             className={cn(
-                "group/bento relative flex h-full flex-col justify-between overflow-hidden rounded-xl border border-[#202024] bg-[#0e1014] p-6 transition-colors duration-300 hover:border-[#2c2c33]",
+                "group/bento relative flex h-full flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-6 transition-colors duration-300 hover:border-muted-foreground/30 dark:border-[#202024] dark:bg-[#0e1014] dark:hover:border-[#2c2c33]",
                 className,
             )}
         >
@@ -38,16 +38,16 @@ export const BentoGridItem = ({
             <div className="relative z-10 flex flex-1 flex-col">
                 <div className="mb-3 flex items-start gap-3">
                     {icon && (
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#3E63A6] text-[#F2F3F5]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#3E63A6]/10 text-[#3E63A6] dark:bg-[#3E63A6] dark:text-[#F2F3F5]">
                             {icon}
                         </div>
                     )}
-                    <h3 className="text-sm font-semibold leading-tight text-[#F2F3F5] md:text-base">
+                    <h3 className="text-sm font-semibold leading-tight text-foreground dark:text-[#F2F3F5] md:text-base">
                         {title}
                     </h3>
                 </div>
 
-                <p className="line-clamp-3 text-xs leading-relaxed text-[#9098A8] md:text-sm">
+                <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground dark:text-[#9098A8] md:text-sm">
                     {description}
                 </p>
             </div>

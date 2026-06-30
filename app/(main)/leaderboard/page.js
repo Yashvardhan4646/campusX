@@ -65,16 +65,16 @@ export default function LeaderboardPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="global" onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8 h-12 bg-zinc-900/50 p-1">
-          <TabsTrigger value="global" className="data-[state=active]:bg-zinc-800">
+        <TabsList className="grid grid-cols-3 mb-8 h-12 bg-muted dark:bg-zinc-900/50 p-1">
+          <TabsTrigger value="global" className="data-[state=active]:bg-background dark:data-[state=active]:bg-zinc-800">
             <Globe className="w-4 h-4 mr-2" />
             Global
           </TabsTrigger>
-          <TabsTrigger value="weekly" className="data-[state=active]:bg-zinc-800">
+          <TabsTrigger value="weekly" className="data-[state=active]:bg-background dark:data-[state=active]:bg-zinc-800">
             <Zap className="w-4 h-4 mr-2" />
             Weekly
           </TabsTrigger>
-          <TabsTrigger value="college" className="data-[state=active]:bg-zinc-800" disabled={!user?.college}>
+          <TabsTrigger value="college" className="data-[state=active]:bg-background dark:data-[state=active]:bg-zinc-800" disabled={!user?.college}>
             <School className="w-4 h-4 mr-2" />
             My College
           </TabsTrigger>
@@ -87,7 +87,7 @@ export default function LeaderboardPage() {
               <p className="text-sm text-muted-foreground">Calculating ranks...</p>
             </div>
           ) : leaderboard.length === 0 ? (
-            <div className="text-center py-20 border border-dashed rounded-3xl bg-zinc-900/20">
+            <div className="text-center py-20 border border-dashed rounded-3xl bg-accent/20 dark:bg-zinc-900/20">
               <Trophy className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
               <h3 className="text-lg font-semibold">No rankings yet</h3>
               <p className="text-sm text-muted-foreground">Be the first to climb the leaderboard!</p>
@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
               {leaderboard.map((item, i) => (
                 <Link key={item.id || item.username} href={`/profile/${item.username}`}>
                   <Card className={cn(
-                    "group relative overflow-hidden flex items-center gap-4 p-4 transition-all hover:bg-zinc-900/50 border-border/50 hover:border-primary/30",
+                    "group relative overflow-hidden flex items-center gap-4 p-4 transition-all hover:bg-accent/40 dark:hover:bg-zinc-900/50 border-border/50 hover:border-primary/30",
                     i < 3 && "bg-primary/[0.02] border-primary/10"
                   )}>
                     {/* Rank Indicator */}
@@ -146,12 +146,12 @@ export default function LeaderboardPage() {
       {/* Your Rank Footer (Sticky) */}
       {user && !loading && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4 z-40 pointer-events-none md:bottom-6">
-          <div className="bg-zinc-900/90 backdrop-blur-md border border-primary/20 p-4 rounded-2xl shadow-2xl shadow-black/50 flex items-center gap-4 pointer-events-auto">
+          <div className="bg-background/90 dark:bg-zinc-900/90 backdrop-blur-md border border-border dark:border-primary/20 p-4 rounded-2xl shadow-lg dark:shadow-2xl dark:shadow-black/50 flex items-center gap-4 pointer-events-auto">
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Your Current Level</span>
               <span className="text-xl font-black text-primary">Lvl {user.level || 1}</span>
             </div>
-            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-primary transition-all duration-1000" 
                 style={{ width: `${((user.xp || 0) % 1000) / 10}%` }}
