@@ -10,13 +10,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Palette, Copy, Edit, Trash2, Check, X } from "lucide-react";
+import {
+    Loader2,
+    Plus,
+    Palette,
+    Copy,
+    Edit,
+    Trash2,
+    Check,
+    X,
+} from "lucide-react";
 import AdminUsersTable from "@/components/admin/AdminUsersTable";
 import AdminReportedContent from "@/components/admin/AdminReportedContent";
 import AdminSecurityPanel from "@/components/admin/AdminSecurityPanel";
 import AdminVerifications from "@/components/admin/AdminVerifications";
 import AdminShopManager from "@/components/admin/AdminShopManager";
 import AdminPromoCodes from "@/components/admin/AdminPromoCodes";
+import AdminDMMessages from "@/components/admin/AdminDMMessages";
 import { formatDistanceToNow } from "date-fns";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -54,12 +64,12 @@ export default function AdminDashboard() {
             const logsData = await logsRes.json();
 
             const resourcesRes = await fetch(
-                "/api/admin/resources?status=pending"
+                "/api/admin/resources?status=pending",
             ).catch(() => ({ json: () => ({ total: 0 }) }));
             const resourcesData = await resourcesRes.json();
 
             const reportedRes = await fetch(
-                "/api/admin/content/reported"
+                "/api/admin/content/reported",
             ).catch(() => ({ json: () => ({ posts: [] }) }));
             const reportedData = await reportedRes.json();
 
@@ -109,6 +119,7 @@ export default function AdminDashboard() {
                         </TabsTrigger>
                         <TabsTrigger value="content">Content</TabsTrigger>
                         <TabsTrigger value="shop">Shop</TabsTrigger>
+                        <TabsTrigger value="dms">Direct Messages</TabsTrigger>
                         <TabsTrigger value="themes">Generate Theme</TabsTrigger>
                         <TabsTrigger value="security">Security</TabsTrigger>
                         <TabsTrigger value="logs">Logs</TabsTrigger>
@@ -199,7 +210,7 @@ export default function AdminDashboard() {
                                                 <p className="text-[10px] text-muted-foreground">
                                                     {formatDistanceToNow(
                                                         new Date(log.createdAt),
-                                                        { addSuffix: true }
+                                                        { addSuffix: true },
                                                     )}{" "}
                                                     by @{log.adminId?.username}
                                                 </p>
@@ -234,6 +245,10 @@ export default function AdminDashboard() {
 
                 <TabsContent value="promocodes">
                     <AdminPromoCodes />
+                </TabsContent>
+
+                <TabsContent value="dms">
+                    <AdminDMMessages />
                 </TabsContent>
 
                 <TabsContent value="themes">
@@ -304,7 +319,12 @@ function getActionEmoji(action) {
 }
 
 function ThemeGenerator() {
-    const { addCustomTheme, customThemes = [], editCustomTheme, deleteCustomTheme } = useTheme();
+    const {
+        addCustomTheme,
+        customThemes = [],
+        editCustomTheme,
+        deleteCustomTheme,
+    } = useTheme();
     const [editingThemeId, setEditingThemeId] = useState(null);
     const [themeName, setThemeName] = useState("");
     const [primaryColor, setPrimaryColor] = useState("#4ba9e1");
@@ -363,8 +383,8 @@ function ThemeGenerator() {
                 mutedForeground: mutedFgColor,
                 accent: accentColor,
                 accentForeground: accentFgColor,
-                border: borderColor
-            }
+                border: borderColor,
+            },
         };
 
         navigator.clipboard.writeText(JSON.stringify(themeObj, null, 2));
@@ -390,8 +410,8 @@ function ThemeGenerator() {
                     mutedForeground: mutedFgColor,
                     accent: accentColor,
                     accentForeground: accentFgColor,
-                    border: borderColor
-                }
+                    border: borderColor,
+                },
             });
         } else {
             addCustomTheme({
@@ -407,8 +427,8 @@ function ThemeGenerator() {
                     mutedForeground: mutedFgColor,
                     accent: accentColor,
                     accentForeground: accentFgColor,
-                    border: borderColor
-                }
+                    border: borderColor,
+                },
             });
         }
 
@@ -423,11 +443,17 @@ function ThemeGenerator() {
                         <CardHeader className="px-0 pt-0">
                             <CardTitle className="flex items-center gap-2">
                                 <Palette className="w-5 h-5" />
-                                {editingThemeId ? "Edit Theme" : "Theme Generator"}
+                                {editingThemeId
+                                    ? "Edit Theme"
+                                    : "Theme Generator"}
                             </CardTitle>
                         </CardHeader>
                         {editingThemeId && (
-                            <Button variant="ghost" size="sm" onClick={resetForm}>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={resetForm}
+                            >
                                 <X className="w-4 h-4" />
                             </Button>
                         )}
@@ -446,43 +472,109 @@ function ThemeGenerator() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Primary Color</Label>
-                                <Input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={primaryColor}
+                                    onChange={(e) =>
+                                        setPrimaryColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Background</Label>
-                                <Input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={bgColor}
+                                    onChange={(e) => setBgColor(e.target.value)}
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Foreground</Label>
-                                <Input type="color" value={fgColor} onChange={(e) => setFgColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={fgColor}
+                                    onChange={(e) => setFgColor(e.target.value)}
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Card</Label>
-                                <Input type="color" value={cardColor} onChange={(e) => setCardColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={cardColor}
+                                    onChange={(e) =>
+                                        setCardColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Card Foreground</Label>
-                                <Input type="color" value={cardFgColor} onChange={(e) => setCardFgColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={cardFgColor}
+                                    onChange={(e) =>
+                                        setCardFgColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Muted</Label>
-                                <Input type="color" value={mutedColor} onChange={(e) => setMutedColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={mutedColor}
+                                    onChange={(e) =>
+                                        setMutedColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Muted Foreground</Label>
-                                <Input type="color" value={mutedFgColor} onChange={(e) => setMutedFgColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={mutedFgColor}
+                                    onChange={(e) =>
+                                        setMutedFgColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Accent</Label>
-                                <Input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={accentColor}
+                                    onChange={(e) =>
+                                        setAccentColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Accent Foreground</Label>
-                                <Input type="color" value={accentFgColor} onChange={(e) => setAccentFgColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={accentFgColor}
+                                    onChange={(e) =>
+                                        setAccentFgColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Border</Label>
-                                <Input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} className="h-10 p-1" />
+                                <Input
+                                    type="color"
+                                    value={borderColor}
+                                    onChange={(e) =>
+                                        setBorderColor(e.target.value)
+                                    }
+                                    className="h-10 p-1"
+                                />
                             </div>
                         </div>
 
@@ -500,7 +592,11 @@ function ThemeGenerator() {
                                     </>
                                 )}
                             </Button>
-                            <Button type="button" variant="outline" onClick={copyThemeCode}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={copyThemeCode}
+                            >
                                 <Copy className="w-4 h-4 mr-2" />
                                 {copied ? "Copied!" : "Copy Code"}
                             </Button>
@@ -511,24 +607,50 @@ function ThemeGenerator() {
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Custom Themes</h3>
                     <div className="space-y-3">
-                        {customThemes.map(theme => (
+                        {customThemes.map((theme) => (
                             <Card key={theme.id} className="p-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg" style={{ backgroundColor: theme.colors.primary }} />
+                                        <div
+                                            className="w-10 h-10 rounded-lg"
+                                            style={{
+                                                backgroundColor:
+                                                    theme.colors.primary,
+                                            }}
+                                        />
                                         <div>
-                                            <p className="font-medium">{theme.name}</p>
-                                            <p className="text-xs text-muted-foreground">{theme.colors.primary}</p>
+                                            <p className="font-medium">
+                                                {theme.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {theme.colors.primary}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex gap-1">
-                                        <Button variant="ghost" size="sm" onClick={() => handleEditTheme(theme)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                                handleEditTheme(theme)
+                                            }
+                                        >
                                             <Edit className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" onClick={() => copyThemeCode(theme)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => copyThemeCode(theme)}
+                                        >
                                             <Copy className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" onClick={() => deleteCustomTheme(theme.id)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                                deleteCustomTheme(theme.id)
+                                            }
+                                        >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
