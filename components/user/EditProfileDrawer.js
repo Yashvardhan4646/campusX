@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Camera, AlertCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiSelect } from "@/components/shared/MultiSelect";
@@ -47,6 +48,7 @@ export default function EditProfileDrawer({
     const [course, setCourse] = useState("");
     const [year, setYear] = useState(1);
     const [interests, setInterests] = useState([]);
+    const [dmEnabled, setDmEnabled] = useState(true);
 
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -74,6 +76,7 @@ export default function EditProfileDrawer({
             setCourse(user.course || "");
             setYear(user.year || 1);
             setInterests(user.interests || []);
+            setDmEnabled(user.dmEnabled !== undefined ? user.dmEnabled : true);
             setAvatarPreview(null);
             setBannerPreview(null);
 
@@ -171,7 +174,7 @@ export default function EditProfileDrawer({
         setUploadingAvatar(true);
         try {
             const res = await fetch("/api/users/avatar", {
-                method: "DELETE"
+                method: "DELETE",
             });
             if (res.ok) {
                 toast.success("Avatar deleted!");
@@ -191,7 +194,7 @@ export default function EditProfileDrawer({
         setUploadingBanner(true);
         try {
             const res = await fetch("/api/users/banner", {
-                method: "DELETE"
+                method: "DELETE",
             });
             if (res.ok) {
                 toast.success("Banner deleted!");
@@ -228,6 +231,7 @@ export default function EditProfileDrawer({
                     course: course.trim(),
                     year: Number(year),
                     interests,
+                    dmEnabled,
                     socialLinks: {
                         twitter: twitter.trim(),
                         instagram: instagram.trim(),
@@ -506,6 +510,22 @@ export default function EditProfileDrawer({
                         <p className="text-[10px] text-muted-foreground">
                             Select 3-10 interests
                         </p>
+                    </div>
+
+                    <div className="flex items-center justify-between py-2">
+                        <div className="space-y-0.5">
+                            <label className="text-sm font-medium">
+                                Direct Messages
+                            </label>
+                            <p className="text-[10px] text-muted-foreground">
+                                Allow others to send you direct messages
+                            </p>
+                        </div>
+                        <Switch
+                            checked={dmEnabled}
+                            onCheckedChange={setDmEnabled}
+                            disabled={saving}
+                        />
                     </div>
 
                     <div className="space-y-1.5">
