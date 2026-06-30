@@ -202,6 +202,11 @@ const userSchema = new mongoose.Schema(
             enum: ["everyone", "verified", "college", "followers", "none"],
             default: "everyone",
         },
+        // DM enabled setting (user can toggle DM access on/off)
+        dmEnabled: {
+            type: Boolean,
+            default: true,
+        },
         // Chat requests
         receivedChatRequests: [
             {
@@ -290,6 +295,7 @@ userSchema.index({ collegeEmail: 1 }, { unique: true, sparse: true });
 userSchema.index({ verificationStatus: 1, verificationRequestedAt: -1 });
 // Chat privacy indexes
 userSchema.index({ chatPrivacy: 1 });
+userSchema.index({ dmEnabled: 1 });
 userSchema.index({ receivedChatRequests: 1 });
 userSchema.index({ sentChatRequests: 1 });
 
